@@ -566,3 +566,47 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
+
+/* ───────────────────────────────
+   RESPONSIVO — MOBILE
+─────────────────────────────── */
+
+@media (max-width: 768px) {
+  /* Navbar */
+  .navbar-username { display: none; }
+  .navbar-search   { max-width: 100%; }
+
+  /* Banner do artista */
+  .artist-banner-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px 16px 20px;
+    gap: 16px;
+  }
+  .artist-avatar { width: 140px; height: 140px; }
+  .artist-name   { font-size: clamp(28px, 8vw, 52px); }
+  .artist-meta   { justify-content: center; }
+
+  .skeleton-avatar { width: 120px; height: 120px; }
+  .artist-banner-skeleton { flex-direction: column; align-items: center; padding: 40px 16px 20px; }
+
+  /* Grid de álbuns — 2 colunas */
+  .albums-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .albums-grid-skeleton { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+  /* Seções */
+  .section-block { padding: 20px 16px; }
+  .tracks-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+
+  /* Faixas */
+  .track-row { grid-template-columns: 32px 1fr auto; padding: 10px 8px; }
+}
+
+@media (max-width: 480px) {
+  .navbar-username { display: none; }
+  .navbar-search   { max-width: 160px; }
+  .albums-grid     { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .album-card      { padding: 10px; }
+  .album-play-btn  { bottom: 60px; right: 12px; width: 36px; height: 36px; }
+}

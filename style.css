@@ -817,3 +817,76 @@ body {
 }
 
 .container-nav { background-color: #181818; }
+
+/* ───────────────────────────────
+   RESPONSIVO — MOBILE
+─────────────────────────────── */
+
+/* Tablet (até 768px) */
+@media (max-width: 768px) {
+  /* Navbar */
+  .navbar-search { max-width: 200px; }
+  .navbar-username { display: none; }
+
+  /* Sidebar escondida — conteúdo ocupa tudo */
+  .sidebar { display: none; }
+  .app-wrapper { margin-bottom: 140px; }
+
+  /* Hero menor */
+  .playlist-hero-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 32px 16px 16px;
+    gap: 16px;
+  }
+  .playlist-hero-cover { height: 160px; }
+  .playlist-hero-title { font-size: clamp(20px, 6vw, 32px); }
+  .playlist-hero-meta  { justify-content: center; }
+
+  /* Ações */
+  .playlist-actions { padding: 12px 16px; flex-wrap: wrap; gap: 12px; }
+  .action-order-label { display: none; }
+
+  /* Song list */
+  .song-list { padding: 0 12px 120px; }
+  .song-list-header,
+  .song-row {
+    grid-template-columns: 32px 1fr 50px;
+  }
+  .song-row-album { display: none; }
+
+  /* Player — empilhado em 2 linhas */
+  .player {
+    height: 140px;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    padding: 8px 16px;
+    gap: 4px;
+  }
+  .player-track { justify-content: center; }
+  .player-volume { display: none; }
+  .player-controls { width: 100%; }
+  .player-progress { width: 100%; }
+}
+
+/* Celular pequeno (até 480px) */
+@media (max-width: 480px) {
+  .navbar-search { display: none; }
+  .navbar-logo .navbar-brand { font-size: 15px; }
+
+  .playlist-hero-cover { height: 120px; }
+
+  .player-buttons { gap: 8px; }
+  .player-btn svg  { width: 16px; height: 16px; }
+  .player-play-btn { width: 32px; height: 32px; }
+
+  /* Mostra botão de busca na navbar em vez da barra */
+  .navbar-search-toggle {
+    display: flex !important;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+  }
+}
