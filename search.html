@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscar — Sound Energy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=New+Rocker&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="search.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar fixed-top">
+        <div class="container-fluid navbar-inner">
+            <div class="navbar-logo">
+                <a href="index.html">
+                    <img src="imgs/2243c3de-9ed4-4bf6-8874-9e36f36f4d09.png" alt="Logo" width="38px">
+                </a>
+                <a class="navbar-brand Logo" href="index.html">Sound Energy</a>
+            </div>
+            <div class="navbar-search" id="navbar-search">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="#b3b3b3">
+                    <path d="M7 1a6 6 0 1 0 3.745 10.745l3.006 3.005a.75.75 0 1 0 1.06-1.06l-3.005-3.006A6 6 0 0 0 7 1zm-4.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0z"/>
+                </svg>
+                <input type="text" class="navbar-search-input" id="search-input"
+                    placeholder="Buscar artista, música ou álbum..." autofocus>
+            </div>
+            <div class="navbar-user">
+                <div class="navbar-avatar">Í</div>
+                <span class="navbar-username">Ítako</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="search-main" id="search-main">
+
+        <!-- Estado inicial (antes de pesquisar) -->
+        <section class="search-empty" id="search-empty">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#535353" stroke-width="1.2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <p>Pesquise um artista para começar</p>
+        </section>
+
+        <!-- Loading skeleton -->
+        <section class="search-loading" id="search-loading" style="display:none;">
+            <div class="artist-banner-skeleton">
+                <div class="skeleton-avatar"></div>
+                <div class="skeleton-info">
+                    <div class="skeleton-bar skeleton-bar-xl"></div>
+                    <div class="skeleton-bar skeleton-bar-md"></div>
+                    <div class="skeleton-bar skeleton-bar-sm"></div>
+                </div>
+            </div>
+            <div class="skeleton-section-title skeleton-bar skeleton-bar-sm"></div>
+            <div class="albums-grid-skeleton">
+                <div class="album-card-skeleton" *ngFor="let i of [1,2,3,4,5,6]">
+                    <div class="skeleton-cover"></div>
+                    <div class="skeleton-bar skeleton-bar-md" style="margin-top:10px"></div>
+                    <div class="skeleton-bar skeleton-bar-sm"></div>
+                </div>
+                <div class="album-card-skeleton"><div class="skeleton-cover"></div></div>
+                <div class="album-card-skeleton"><div class="skeleton-cover"></div></div>
+                <div class="album-card-skeleton"><div class="skeleton-cover"></div></div>
+                <div class="album-card-skeleton"><div class="skeleton-cover"></div></div>
+                <div class="album-card-skeleton"><div class="skeleton-cover"></div></div>
+                <div class="album-card-skeleton"><div class="skeleton-cover"></div></div>
+            </div>
+        </section>
+
+        <!-- Resultado da busca -->
+        <section class="search-result" id="search-result" style="display:none;">
+
+            <!-- Banner do artista -->
+            <div class="artist-banner" id="artist-banner">
+                <div class="artist-banner-bg" id="artist-banner-bg"></div>
+                <div class="artist-banner-inner">
+                    <img src="" alt="" class="artist-avatar" id="artist-avatar">
+                    <div class="artist-info">
+                        <span class="artist-label">Artista verificado</span>
+                        <h1 class="artist-name" id="artist-name"></h1>
+                        <div class="artist-meta">
+                            <span class="artist-followers" id="artist-followers"></span>
+                            <span class="artist-genres" id="artist-genres"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de álbuns -->
+            <div class="section-block">
+                <h2 class="section-title">Discografia</h2>
+                <div class="albums-grid" id="albums-grid"></div>
+            </div>
+
+            <!-- Seção de faixas -->
+            <div class="section-block" id="tracks-section" style="display:none;">
+                <div class="tracks-header">
+                    <h2 class="section-title" id="tracks-title">Faixas</h2>
+                    <button class="back-btn" id="back-btn">← Voltar para álbuns</button>
+                </div>
+                <div class="tracks-list-header">
+                    <span>#</span>
+                    <span>Título</span>
+                    <span>Duração</span>
+                </div>
+                <div id="tracks-list"></div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
+    <script src="search.js"></script>
+</body>
+
+</html>
