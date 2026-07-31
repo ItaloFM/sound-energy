@@ -486,22 +486,32 @@ async function fetchComRetry(url, token, tentativas = 3) {
 }
 
 async function buscarFaixas(playlistId, playlistNome, indice = 0) {
-    // Se tem OAuth token, busca direto da playlist do Spotify (1 requisição)
+    // Tenta com OAuth primeiro (funciona para playlists do usuário e públicas)
     const oauthToken = await getOAuthTokenValido();
     if (oauthToken) {
         const r = await fetch(
-            "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks?limit=20",
+            "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks?limit=20&market=BR",
             { headers: { "Authorization": "Bearer " + oauthToken } }
         );
+        console.log("Status faixas OAuth:", r.status, playlistId);
         if (r.ok) {
             const data = await r.json();
-            return (data?.items || [])
-                .map(item => item?.track)
-                .filter(Boolean);
+            return (data?.items || []).map(item => item?.track).filter(Boolean);
+        }
+        // 403 — tenta sem market
+        if (r.status === 403) {
+            const r2 = await fetch(
+                "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks?limit=20",
+                { headers: { "Authorization": "Bearer " + oauthToken } }
+            );
+            if (r2.ok) {
+                const data = await r2.json();
+                return (data?.items || []).map(item => item?.track).filter(Boolean);
+            }
         }
     }
 
-    // Fallback sem OAuth — usa artistas fixos
+    // Fallback — artistas fixos
     const artistId = ARTISTAS_FAIXAS[indice % ARTISTAS_FAIXAS.length];
     const token    = await getToken();
 
