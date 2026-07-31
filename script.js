@@ -278,26 +278,44 @@ const ARTISTAS_FAIXAS = [
     "0EmeFodog0BfCgMzAIvKQp"  // Zé Neto & Cristiano
 ];
 
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+async function fetchComRetry(url, token, tentativas = 3) {
+    for (let i = 0; i < tentativas; i++) {
+        const r = await fetch(url, { headers: { "Authorization": "Bearer " + token } });
+        if (r.status === 429) {
+            const wait = (parseInt(r.headers.get("Retry-After") || "3") + 1) * 1000;
+            console.warn(`Rate limit (429). Aguardando ${wait}ms...`);
+            await delay(wait);
+            continue;
+        }
+        if (!r.ok) return null;
+        return r;
+    }
+    return null;
+}
+
 async function buscarFaixas(playlistId, playlistNome, indice = 0) {
     const artistId = ARTISTAS_FAIXAS[indice % ARTISTAS_FAIXAS.length];
     const token    = await getToken();
 
-    const albumsResp = await fetch(
-        "https://api.spotify.com/v1/artists/" + artistId + "/albums?offset=0",
-        { headers: { "Authorization": "Bearer " + token } }
+    const albumsResp = await fetchComRetry(
+        "https://api.spotify.com/v1/artists/" + artistId + "/albums?offset=0", token
     );
-    if (!albumsResp.ok) return [];
+    if (!albumsResp) return [];
 
     const albumsData = await albumsResp.json();
     const albums     = albumsData?.items?.filter(Boolean) || [];
     if (!albums.length) return [];
 
+    // pequeno delay entre requisições para não bater no rate limit
+    await delay(300);
+
     const albumId    = albums[0].id;
-    const tracksResp = await fetch(
-        "https://api.spotify.com/v1/albums/" + albumId + "/tracks?offset=0",
-        { headers: { "Authorization": "Bearer " + token } }
+    const tracksResp = await fetchComRetry(
+        "https://api.spotify.com/v1/albums/" + albumId + "/tracks?offset=0", token
     );
-    if (!tracksResp.ok) return [];
+    if (!tracksResp) return [];
 
     const tracksData = await tracksResp.json();
     return (tracksData?.items || []).map(t => ({
