@@ -488,6 +488,8 @@ async function fetchComRetry(url, token, tentativas = 3) {
 
 async function buscarFaixas(playlistId, playlistNome, indice = 0) {
     const oauthToken = await getOAuthTokenValido();
+
+    // Tenta buscar faixas da playlist com OAuth
     if (oauthToken) {
         const r = await fetch(
             "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks?limit=50",
@@ -496,25 +498,36 @@ async function buscarFaixas(playlistId, playlistNome, indice = 0) {
         console.log("Status faixas OAuth:", r.status, playlistId);
         if (r.ok) {
             const data = await r.json();
-            return (data?.items || []).map(item => item?.track).filter(t => t && t.name);
+            const faixas = (data?.items || []).map(item => item?.track).filter(t => t && t.name);
+            if (faixas.length > 0) return faixas;
         }
     }
 
-    // Fallback — usa client_credentials (não OAuth) para evitar restrições
-    const tokenCC = await getToken(); // client_credentials
-    const queries = ["pop", "rock", "soul", "jazz"];
-    const q = queries[indice % queries.length];
-    console.log("Search fallback query:", q);
-    const r2 = await fetch(
-        "https://api.spotify.com/v1/search?q=" + q + "&type=track&limit=20",
-        { headers: { "Authorization": "Bearer " + tokenCC } }
+    // Fallback — busca álbuns do artista via IDs fixos
+    const token = await getToken();
+    const artistId = ARTISTAS_FAIXAS[indice % ARTISTAS_FAIXAS.length];
+
+    const albumsResp = await fetchComRetry(
+        "https://api.spotify.com/v1/artists/" + artistId + "/albums?offset=0", token
     );
-    console.log("Search fallback status:", r2.status);
-    if (r2.ok) {
-        const data = await r2.json();
-        return data?.tracks?.items?.filter(Boolean) || [];
-    }
-    return [];
+    if (!albumsResp) return [];
+
+    const albumsData = await albumsResp.json();
+    const albums = albumsData?.items?.filter(Boolean) || [];
+    if (!albums.length) return [];
+
+    await delay(300);
+
+    const tracksResp = await fetchComRetry(
+        "https://api.spotify.com/v1/albums/" + albums[0].id + "/tracks?offset=0", token
+    );
+    if (!tracksResp) return [];
+
+    const tracksData = await tracksResp.json();
+    return (tracksData?.items || []).map(t => ({
+        ...t,
+        album: { name: albums[0].name, images: albums[0].images }
+    })).filter(Boolean);
 }
 
 // ─────────────────────────────────────────
