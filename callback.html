@@ -33,7 +33,6 @@
     <div class="spinner"></div>
     <p>Autenticando com Spotify...</p>
     <script>
-        // Processa o callback do OAuth PKCE
         async function processarCallback() {
             const params = new URLSearchParams(window.location.search);
             const code   = params.get("code");
@@ -47,7 +46,7 @@
 
             const codeVerifier = localStorage.getItem("se_code_verifier");
             const clientId     = "26a4960d1ff049cd856ef4656003a29b";
-            const redirectUri  = window.location.origin + "/callback.html";
+            const redirectUri  = window.location.origin + "/sound-energy/callback.html";
 
             try {
                 const response = await fetch("https://accounts.spotify.com/api/token", {
@@ -63,11 +62,12 @@
                 });
 
                 const data = await response.json();
+                console.log("Token response:", data);
 
                 if (data.access_token) {
-                    localStorage.setItem("se_oauth_token",        data.access_token);
-                    localStorage.setItem("se_oauth_refresh",       data.refresh_token || "");
-                    localStorage.setItem("se_oauth_expires_at",    Date.now() + (data.expires_in - 60) * 1000);
+                    localStorage.setItem("se_oauth_token",      data.access_token);
+                    localStorage.setItem("se_oauth_refresh",    data.refresh_token || "");
+                    localStorage.setItem("se_oauth_expires_at", Date.now() + (data.expires_in - 60) * 1000);
                     localStorage.removeItem("se_code_verifier");
 
                     // Busca dados do usuário
@@ -76,11 +76,13 @@
                     });
                     const user = await userResp.json();
                     localStorage.setItem("se_spotify_user", JSON.stringify({
-                        nome:   user.display_name || "Usuário",
-                        foto:   user.images?.[0]?.url || "",
-                        id:     user.id,
-                        email:  user.email || ""
+                        nome:  user.display_name || "Usuário",
+                        foto:  user.images?.[0]?.url || "",
+                        id:    user.id,
+                        email: user.email || ""
                     }));
+                } else {
+                    console.error("Erro no token:", data);
                 }
             } catch (e) {
                 console.error("Erro ao trocar código:", e);
