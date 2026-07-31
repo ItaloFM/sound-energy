@@ -73,13 +73,13 @@ body::after {
 }
 
 /* Logo — centralizada, sem texto ao lado */
-.cointainer img {
-  width: 120px;
-  height: 120px;
+.login-logo {
+  width: 140px;
+  height: 140px;
   object-fit: contain;
   border-radius: 16px;
-  margin-bottom: 4px;
   display: block;
+  margin: 0 auto 8px auto;
 }
 
 /* Remove o texto "Sound Energy" gerado pelo ::after */
