@@ -660,11 +660,11 @@ $(document).ready(async function () {
     console.log(`✅ ${playlists.length} playlists carregadas:`, playlists.map(p => p.name));
     renderizarSidebar(playlists);
 
+    // Carrega hero da primeira playlist mas SEM buscar faixas ainda
     const primeira = playlists[0];
-    atualizarHero(
-        primeira.id,
-        primeira.images?.[0]?.url || "imgs/playlist1.png",
-        primeira.name,
-        primeira.owner?.display_name || "Spotify"
-    );
+    $("#playlist-hero-cover").attr("src", primeira.images?.[0]?.url || "imgs/playlist1.png");
+    $("#playlist-hero-title").text(primeira.name);
+    $(".hero-meta-author").text(primeira.owner?.display_name || "Spotify");
+    $(".hero-meta-stats").text("Clique em uma playlist para ver as músicas");
+    $(".playlist-item").first().addClass("active");
 });
