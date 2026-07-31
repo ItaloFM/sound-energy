@@ -433,17 +433,24 @@ async function buscarPlaylistsDestaque() {
     // Se tem OAuth, busca as playlists do próprio usuário
     const oauthToken = await getOAuthTokenValido();
     if (oauthToken) {
+        console.log("Tentando buscar playlists do usuário com OAuth...");
         const r = await fetch("https://api.spotify.com/v1/me/playlists?limit=4", {
             headers: { "Authorization": "Bearer " + oauthToken }
         });
+        console.log("Status /me/playlists:", r.status);
         if (r.ok) {
             const data = await r.json();
             const playlists = data?.items?.filter(Boolean) || [];
             if (playlists.length > 0) {
-                console.log("Playlists do usuário carregadas:", playlists.length);
+                console.log("✅ Playlists do usuário:", playlists.map(p => p.name));
                 return playlists;
             }
+        } else {
+            const err = await r.json();
+            console.warn("Erro /me/playlists:", err);
         }
+    } else {
+        console.warn("Sem OAuth token — usando fallback.");
     }
 
     // Fallback — playlists em destaque via client credentials
