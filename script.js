@@ -458,9 +458,7 @@ async function buscarFaixas(playlistId, playlistNome, indice = 0) {
     const artistId = ARTISTAS_FAIXAS[indice % ARTISTAS_FAIXAS.length];
     const token    = await getToken();
 
-    // delay escalonado por índice para não disparar tudo ao mesmo tempo
-    await delay(indice * 800);
-
+    // sem delay escalonado — só carrega quando o usuário clica
     const albumsResp = await fetchComRetry(
         "https://api.spotify.com/v1/artists/" + artistId + "/albums?offset=0", token
     );
@@ -560,8 +558,7 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
         $("#playlist-hero-bg").css("opacity", 0).css("background", g).animate({ opacity: 1 }, 400);
     });
 
-    buscarFaixas(playlistId, nome, indice).then(faixas => {
-        filaFaixas = faixas;
+    buscarFaixas(playlistId, nome, indice).then(faixas => {        filaFaixas = faixas;
         const total    = faixas.length;
         const durTotal = faixas.reduce((a, t) => a + (t?.duration_ms || 0), 0);
         const min      = Math.floor(durTotal / 60000);
