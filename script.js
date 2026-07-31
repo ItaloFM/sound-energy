@@ -418,7 +418,7 @@ function carregarUsuarioNavbar() {
                     window.location.href = "login.html";
                 });
                 document.getElementById("swal-spotify")?.addEventListener("click", () => {
-                    // Limpa token antigo para forçar novo login com escopos atualizados
+                    // Limpa só o token, mantém a SDK conectada
                     localStorage.removeItem("se_oauth_token");
                     localStorage.removeItem("se_oauth_refresh");
                     localStorage.removeItem("se_oauth_expires_at");
@@ -492,7 +492,6 @@ async function fetchComRetry(url, token, tentativas = 3) {
 async function buscarFaixas(playlistId, playlistNome, indice = 0) {
     const oauthToken = await getOAuthTokenValido();
     if (oauthToken) {
-        // Tenta buscar faixas da playlist
         const r = await fetch(
             "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks?limit=50",
             { headers: { "Authorization": "Bearer " + oauthToken } }
@@ -504,21 +503,18 @@ async function buscarFaixas(playlistId, playlistNome, indice = 0) {
         }
     }
 
-    // Fallback — busca faixas via search pelo nome da playlist
-    const oauthToken2 = await getOAuthTokenValido();
-    if (oauthToken2) {
-        const query = encodeURIComponent(playlistNome.replace(/[^\w\s]/g, "").trim().split(" ").slice(0, 3).join(" "));
-        const r = await fetch(
-            "https://api.spotify.com/v1/search?q=" + query + "&type=track&limit=20&market=BR",
-            { headers: { "Authorization": "Bearer " + oauthToken2 } }
-        );
-        if (r.ok) {
-            const data = await r.json();
-            console.log("Faixas via search:", data?.tracks?.items?.length);
-            return data?.tracks?.items?.filter(Boolean) || [];
-        }
+    // Fallback — top tracks do Brasil via OAuth search
+    const token2 = await getOAuthTokenValido() || await getToken();
+    const queries = ["hits brasil 2026", "musica brasileira", "sertanejo", "pagode"];
+    const q = queries[indice % queries.length];
+    const r2 = await fetch(
+        "https://api.spotify.com/v1/search?q=" + encodeURIComponent(q) + "&type=track&limit=20",
+        { headers: { "Authorization": "Bearer " + token2 } }
+    );
+    if (r2.ok) {
+        const data = await r2.json();
+        return data?.tracks?.items?.filter(Boolean) || [];
     }
-
     return [];
 }
 
@@ -593,13 +589,23 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
     // Botão play do hero toca a playlist inteira
     $(".action-play").off("click").on("click", async () => {
         const oauthToken = await getOAuthTokenValido();
-        if (sdkPronto && deviceId && oauthToken) {
-            await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
+        if (!oauthToken) { loginSpotify(); return; }
+
+        // Se device sumiu, tenta reconectar a SDK
+        if (!deviceId || !sdkPronto) {
+            console.warn("Device ID não encontrado, reconectando SDK...");
+            if (spotifyPlayer) spotifyPlayer.connect();
+            await delay(2000);
+        }
+
+        if (deviceId && oauthToken) {
+            const resp = await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
                 method: "PUT",
                 headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
                 body: JSON.stringify({ context_uri: "spotify:playlist:" + playlistId })
             });
-            setIconePlay(true);
+            console.log("Play status:", resp.status);
+            if (resp.ok || resp.status === 204) setIconePlay(true);
         }
     });
 
