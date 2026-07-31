@@ -37,6 +37,13 @@
                     <input type="text" class="navbar-search-input" id="navbar-search-input" placeholder="O que você quer ouvir?" autocomplete="off">
                 </div>
 
+                <!-- Botão menu mobile -->
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir playlists">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+                        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                    </svg>
+                </button>
+
                 <!-- Avatar do usuário -->
                 <div class="navbar-user">
                     <div class="navbar-avatar">Í</div>
@@ -49,6 +56,8 @@
 
 
     <div class="app-wrapper">
+        <!-- Overlay para fechar sidebar no mobile -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
         <aside class="sidebar">
             <!-- Header da biblioteca -->
             <div class="sidebar-header">
@@ -254,7 +263,7 @@
 
 
     <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
-    <script src="script.js?v=8"></script>
+    <script src="script.js?v=9"></script>
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
 </body>
 

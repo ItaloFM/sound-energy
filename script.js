@@ -728,6 +728,23 @@ $(document).ready(async function () {
         }
     });
 
+    // Mobile drawer — abre/fecha sidebar
+    $("#mobile-menu-btn").on("click", function () {
+        $(".sidebar").addClass("open");
+        $(".sidebar-overlay").addClass("active");
+    });
+
+    $("#sidebar-overlay").on("click", function () {
+        $(".sidebar").removeClass("open");
+        $(".sidebar-overlay").removeClass("active");
+    });
+
+    // Fecha drawer ao clicar numa playlist
+    $(document).on("click", ".playlist-item", function () {
+        $(".sidebar").removeClass("open");
+        $(".sidebar-overlay").removeClass("active");
+    });
+
     $(".player-progress .player-time:last-child").attr("id", "player-total");
 
     await gerarToken();
