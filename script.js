@@ -258,15 +258,19 @@ async function tocarFaixa(track, idx) {
     if (sdkPronto && deviceId) {
         const oauthToken = await getOAuthTokenValido();
         if (oauthToken && track.uri) {
-            // Monta fila a partir da faixa clicada
+            // Toca a faixa específica + fila do restante
             const uris = filaFaixas.slice(idx).map(t => t.uri).filter(Boolean);
+            const body = uris.length > 0
+                ? JSON.stringify({ uris: uris.slice(0, 50) })
+                : JSON.stringify({ uris: [track.uri] });
+
             await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
                 method: "PUT",
                 headers: {
                     "Authorization": "Bearer " + oauthToken,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ uris: uris.slice(0, 50) })
+                body: body
             });
             setIconePlay(true);
             return;
@@ -486,57 +490,36 @@ async function fetchComRetry(url, token, tentativas = 3) {
 }
 
 async function buscarFaixas(playlistId, playlistNome, indice = 0) {
-    // Tenta com OAuth primeiro (funciona para playlists do usuário e públicas)
     const oauthToken = await getOAuthTokenValido();
     if (oauthToken) {
+        // Tenta buscar faixas da playlist
         const r = await fetch(
-            "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks?limit=20&market=BR",
+            "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks?limit=50",
             { headers: { "Authorization": "Bearer " + oauthToken } }
         );
         console.log("Status faixas OAuth:", r.status, playlistId);
         if (r.ok) {
             const data = await r.json();
-            return (data?.items || []).map(item => item?.track).filter(Boolean);
-        }
-        // 403 — tenta sem market
-        if (r.status === 403) {
-            const r2 = await fetch(
-                "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks?limit=20",
-                { headers: { "Authorization": "Bearer " + oauthToken } }
-            );
-            if (r2.ok) {
-                const data = await r2.json();
-                return (data?.items || []).map(item => item?.track).filter(Boolean);
-            }
+            return (data?.items || []).map(item => item?.track).filter(t => t && t.name);
         }
     }
 
-    // Fallback — artistas fixos
-    const artistId = ARTISTAS_FAIXAS[indice % ARTISTAS_FAIXAS.length];
-    const token    = await getToken();
+    // Fallback — busca faixas via search pelo nome da playlist
+    const oauthToken2 = await getOAuthTokenValido();
+    if (oauthToken2) {
+        const query = encodeURIComponent(playlistNome.replace(/[^\w\s]/g, "").trim().split(" ").slice(0, 3).join(" "));
+        const r = await fetch(
+            "https://api.spotify.com/v1/search?q=" + query + "&type=track&limit=20&market=BR",
+            { headers: { "Authorization": "Bearer " + oauthToken2 } }
+        );
+        if (r.ok) {
+            const data = await r.json();
+            console.log("Faixas via search:", data?.tracks?.items?.length);
+            return data?.tracks?.items?.filter(Boolean) || [];
+        }
+    }
 
-    const albumsResp = await fetchComRetry(
-        "https://api.spotify.com/v1/artists/" + artistId + "/albums?offset=0", token
-    );
-    if (!albumsResp) return [];
-
-    const albumsData = await albumsResp.json();
-    const albums     = albumsData?.items?.filter(Boolean) || [];
-    if (!albums.length) return [];
-
-    await delay(500);
-
-    const albumId    = albums[0].id;
-    const tracksResp = await fetchComRetry(
-        "https://api.spotify.com/v1/albums/" + albumId + "/tracks?offset=0", token
-    );
-    if (!tracksResp) return [];
-
-    const tracksData = await tracksResp.json();
-    return (tracksData?.items || []).map(t => ({
-        ...t,
-        album: { name: albums[0].name, images: albums[0].images }
-    })).filter(Boolean);
+    return [];
 }
 
 // ─────────────────────────────────────────
@@ -606,6 +589,19 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
     $("#playlist-hero-title").text(nome);
     $(".hero-meta-author").text(dono);
     $(".hero-meta-stats").text("Carregando faixas...");
+
+    // Botão play do hero toca a playlist inteira
+    $(".action-play").off("click").on("click", async () => {
+        const oauthToken = await getOAuthTokenValido();
+        if (sdkPronto && deviceId && oauthToken) {
+            await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
+                method: "PUT",
+                headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
+                body: JSON.stringify({ context_uri: "spotify:playlist:" + playlistId })
+            });
+            setIconePlay(true);
+        }
+    });
 
     const tempImg = new Image();
     tempImg.crossOrigin = "anonymous";
