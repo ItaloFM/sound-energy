@@ -820,146 +820,140 @@ body {
    RESPONSIVO — MOBILE
 ─────────────────────────────── */
 
-/* Tablet (até 768px) */
+/* ── Botão menu e overlay (base — ocultos no desktop) ── */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: background-color 0.15s;
+  align-items: center;
+  justify-content: center;
+}
+.mobile-menu-btn:hover { background-color: #2a2a2a; }
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 150;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.sidebar-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ── TABLET (até 768px) ── */
 @media (max-width: 768px) {
+
   /* Navbar */
-  .navbar-search { max-width: 200px; }
+  .navbar-search { max-width: 240px; }
   .navbar-username { display: none; }
+  .mobile-menu-btn { display: flex; }
+  .sidebar-overlay { display: block; }
 
-  /* Sidebar escondida — conteúdo ocupa tudo */
-  .sidebar { display: none; }
-  .app-wrapper { margin-bottom: 140px; }
+  /* App wrapper */
+  .app-wrapper {
+    margin-bottom: 150px;
+  }
 
-  /* Hero menor */
+  /* Sidebar vira drawer deslizante */
+  .sidebar {
+    display: flex !important;
+    position: fixed;
+    left: -105%;
+    top: 0;
+    height: 100vh;
+    width: 82vw;
+    max-width: 300px;
+    z-index: 200;
+    transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
+    padding-top: 56px;
+    background-color: #1a1a1a;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+  }
+  .sidebar.open { left: 0; }
+
+  /* Hero */
   .playlist-hero-inner {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 32px 16px 16px;
+    padding: 28px 16px 12px;
     gap: 16px;
   }
-  .playlist-hero-cover { height: 160px; }
-  .playlist-hero-title { font-size: clamp(20px, 6vw, 32px); }
+  .playlist-hero-cover { height: 150px; }
+  .playlist-hero-title { font-size: clamp(22px, 6vw, 34px); }
   .playlist-hero-meta  { justify-content: center; }
 
   /* Ações */
-  .playlist-actions { padding: 12px 16px; flex-wrap: wrap; gap: 12px; }
+  .playlist-actions {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
   .action-order-label { display: none; }
+  .playlist-actions-right { gap: 10px; }
 
   /* Song list */
-  .song-list { padding: 0 12px 120px; }
+  .song-list { padding: 0 12px 160px; }
   .song-list-header,
-  .song-row {
-    grid-template-columns: 32px 1fr 50px;
-  }
+  .song-row { grid-template-columns: 32px 1fr 50px; }
   .song-row-album { display: none; }
 
-  /* Player — empilhado em 2 linhas */
+  /* Player — 3 linhas no mobile */
   .player {
-    height: 140px;
+    height: 150px;
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    padding: 8px 16px;
-    gap: 4px;
+    grid-template-rows: auto auto auto;
+    padding: 8px 16px 10px;
+    gap: 2px;
+    align-content: center;
   }
-  .player-track { justify-content: center; }
+  .player-track {
+    justify-content: center;
+    gap: 10px;
+  }
+  .player-thumb { width: 40px; height: 40px; }
   .player-volume { display: none; }
   .player-controls { width: 100%; }
   .player-progress { width: 100%; }
+  .player-buttons { gap: 12px; }
 }
 
-/* Celular pequeno (até 480px) */
+/* ── CELULAR PEQUENO (até 480px) ── */
 @media (max-width: 480px) {
-  /* Barra de busca vira linha separada abaixo da navbar */
-  .navbar-inner {
-    flex-wrap: wrap;
-    height: auto;
-    padding: 8px 0 4px 0;
-  }
 
+  /* Navbar — busca desce para segunda linha */
+  .navbar { height: auto !important; padding-bottom: 6px; }
+  .navbar-inner { flex-wrap: wrap; padding: 4px 0 2px; }
   .navbar-search {
     order: 3;
     max-width: 100%;
     width: 100%;
     margin-top: 4px;
   }
+  .app-wrapper { margin-top: 96px; }
 
-  .navbar {
-    height: auto !important;
-  }
+  /* Navbar logo menor */
+  .navbar-brand.Logo { font-size: 15px; }
+  .navbar-logo img   { width: 28px !important; }
 
-  .app-wrapper {
-    margin-top: 96px;
-  }
+  /* Hero ainda menor */
+  .playlist-hero-cover { height: 120px; }
+  .playlist-hero-title { font-size: clamp(18px, 5vw, 26px); }
 
-  .navbar-logo .navbar-brand { font-size: 15px; }
-  .player-buttons { gap: 8px; }
-  .player-btn svg  { width: 16px; height: 16px; }
-  .player-play-btn { width: 32px; height: 32px; }
-}
-
-/* ───────────────────────────────
-   MOBILE DRAWER
-─────────────────────────────── */
-.mobile-menu-btn {
-    display: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 8px;
-    flex-shrink: 0;
-    transition: background-color 0.15s;
-}
-
-.mobile-menu-btn:hover { background-color: #2a2a2a; }
-
-.sidebar-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 150;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.sidebar-overlay.active {
-    opacity: 1;
-}
-
-@media (max-width: 768px) {
-    .mobile-menu-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .sidebar-overlay {
-        display: block;
-        pointer-events: none;
-    }
-
-    .sidebar-overlay.active {
-        pointer-events: all;
-    }
-
-    /* Sidebar vira drawer deslizante */
-    .sidebar {
-        display: flex !important;
-        position: fixed;
-        left: -100%;
-        top: 0;
-        height: 100vh;
-        width: 80vw;
-        max-width: 300px;
-        z-index: 200;
-        transition: left 0.3s ease;
-        padding-top: 56px;
-        background-color: #1a1a1a;
-    }
-
-    .sidebar.open {
-        left: 0;
-    }
+  /* Player — botões menores */
+  .player { height: 140px; }
+  .player-play-btn { width: 34px; height: 34px; }
+  .player-btn svg  { width: 15px; height: 15px; }
+  .player-track-name   { font-size: 12px; }
+  .player-track-artist { font-size: 10px; }
 }
