@@ -433,36 +433,33 @@ function carregarUsuarioNavbar() {
 // ─────────────────────────────────────────
 //  API — PLAYLISTS E FAIXAS
 // ─────────────────────────────────────────
+// IDs fixos das playlists do usuário na ordem desejada
+const PLAYLIST_IDS = [
+    "4IqfA57y1Hvpybz4lBwBwe", // The ultimate universe
+    "3oM0gSL5nSngOr3FHSBAy3", // A moment for me
+    "2Zk2qafpWhUo12B2mfVGW1", // A mesma pessoa
+    "7JwQ79zuiAdQKFat4fqXuT"  // Jovens Titans
+];
+
 async function buscarPlaylistsDestaque() {
-    // Se tem OAuth, busca as playlists do próprio usuário
     const oauthToken = await getOAuthTokenValido();
-    if (oauthToken) {
-        console.log("Tentando buscar playlists do usuário com OAuth...");
-        const r = await fetch("https://api.spotify.com/v1/me/playlists?limit=4", {
-            headers: { "Authorization": "Bearer " + oauthToken }
+    const token      = oauthToken || await getToken();
+
+    const playlists = [];
+    for (const id of PLAYLIST_IDS) {
+        const r = await fetch("https://api.spotify.com/v1/playlists/" + id + "?fields=id,name,images,owner", {
+            headers: { "Authorization": "Bearer " + token }
         });
-        console.log("Status /me/playlists:", r.status);
         if (r.ok) {
             const data = await r.json();
-            const playlists = data?.items?.filter(Boolean) || [];
-            if (playlists.length > 0) {
-                console.log("✅ Playlists do usuário:", playlists.map(p => p.name));
-                return playlists;
-            }
+            playlists.push(data);
         } else {
-            const err = await r.json();
-            console.warn("Erro /me/playlists:", err);
+            console.warn("Erro ao buscar playlist " + id + ":", r.status);
         }
-    } else {
-        console.warn("Sem OAuth token — usando fallback.");
     }
 
-    // Fallback — playlists em destaque via client credentials
-    const data  = await spotifyFetch("/search?q=Top+50&type=playlist&limit=10&market=BR");
-    const todas = data?.playlists?.items?.filter(Boolean) || [];
-    console.log("Playlists recebidas:", todas.length);
-    const oficiais = todas.filter(pl => pl.owner?.id === "spotify");
-    return (oficiais.length > 0 ? oficiais : todas).slice(0, 4);
+    console.log("Playlists carregadas:", playlists.map(p => p.name));
+    return playlists;
 }
 
 const ARTISTAS_FAIXAS = [
