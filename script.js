@@ -503,9 +503,9 @@ async function buscarFaixas(playlistId, playlistNome, indice = 0) {
         }
     }
 
-    // Fallback — top tracks via OAuth search com query simples
+    // Fallback — queries simples que funcionam no browser
     const token2 = await getOAuthTokenValido() || await getToken();
-    const queries = ["sertanejo", "pagode", "funk", "axe"];
+    const queries = ["pop", "rock", "soul", "jazz"];
     const q = queries[indice % queries.length];
     const r2 = await fetch(
         "https://api.spotify.com/v1/search?q=" + q + "&type=track&limit=20",
