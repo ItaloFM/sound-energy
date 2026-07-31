@@ -136,68 +136,72 @@ let spotifyPlayer = null;
 let deviceId      = null;
 let sdkPronto     = false;
 
-function iniciarSDK() {
-    window.onSpotifyWebPlaybackSDKReady = async () => {
-        const oauthToken = await getOAuthTokenValido();
-        if (!oauthToken) {
-            console.warn("SDK pronta mas sem OAuth token.");
-            return;
+// A SDK chama essa função globalmente quando está pronta
+window.onSpotifyWebPlaybackSDKReady = async () => {
+    const oauthToken = await getOAuthTokenValido();
+    if (!oauthToken) {
+        console.warn("SDK pronta mas sem OAuth token.");
+        return;
+    }
+
+    spotifyPlayer = new Spotify.Player({
+        name: "Sound Energy",
+        getOAuthToken: async cb => {
+            const t = await getOAuthTokenValido();
+            cb(t);
+        },
+        volume: 0.7
+    });
+
+    spotifyPlayer.addListener("ready", ({ device_id }) => {
+        deviceId  = device_id;
+        sdkPronto = true;
+        console.log("✅ Spotify SDK pronta. Device ID:", device_id);
+        atualizarBotaoPlayer(true);
+    });
+
+    spotifyPlayer.addListener("not_ready", ({ device_id }) => {
+        console.warn("SDK não disponível. Device ID:", device_id);
+        sdkPronto = false;
+    });
+
+    spotifyPlayer.addListener("player_state_changed", state => {
+        if (!state) return;
+        const track = state.track_window.current_track;
+        if (track) {
+            $("#player-track-name").text(track.name);
+            $("#player-track-artist").text(track.artists.map(a => a.name).join(", "));
+            const img = track.album.images?.[2]?.url || track.album.images?.[0]?.url || "";
+            if (img) $("#player-thumb").attr("src", img);
         }
+        setIconePlay(!state.paused);
+        atualizarProgressoSDK(state);
+    });
 
-        spotifyPlayer = new Spotify.Player({
-            name: "Sound Energy",
-            getOAuthToken: async cb => {
-                const t = await getOAuthTokenValido();
-                cb(t);
-            },
-            volume: 0.7
+    spotifyPlayer.addListener("authentication_error", ({ message }) => {
+        console.error("Erro de autenticação:", message);
+    });
+
+    spotifyPlayer.addListener("account_error", ({ message }) => {
+        console.error("Erro de conta:", message);
+        Swal.fire({
+            icon: "error",
+            title: "Conta Premium necessária",
+            text: "A reprodução completa requer Spotify Premium.",
+            background: "#1a1a1a",
+            color: "#fff",
+            confirmButtonColor: "#cc0000"
         });
+    });
 
-        // Eventos da SDK
-        spotifyPlayer.addListener("ready", ({ device_id }) => {
-            deviceId  = device_id;
-            sdkPronto = true;
-            console.log("✅ Spotify SDK pronta. Device ID:", device_id);
-            atualizarBotaoPlayer(true);
-        });
+    spotifyPlayer.connect();
+};
 
-        spotifyPlayer.addListener("not_ready", ({ device_id }) => {
-            console.warn("SDK não disponível. Device ID:", device_id);
-            sdkPronto = false;
-        });
-
-        spotifyPlayer.addListener("player_state_changed", state => {
-            if (!state) return;
-            const track = state.track_window.current_track;
-            if (track) {
-                $("#player-track-name").text(track.name);
-                $("#player-track-artist").text(track.artists.map(a => a.name).join(", "));
-                const img = track.album.images?.[2]?.url || track.album.images?.[0]?.url || "";
-                if (img) $("#player-thumb").attr("src", img);
-            }
-            const paused = state.paused;
-            setIconePlay(!paused);
-            atualizarProgressoSDK(state);
-        });
-
-        spotifyPlayer.addListener("authentication_error", ({ message }) => {
-            console.error("Erro de autenticação:", message);
-        });
-
-        spotifyPlayer.addListener("account_error", ({ message }) => {
-            console.error("Erro de conta (precisa de Premium):", message);
-            Swal.fire({
-                icon: "error",
-                title: "Conta Premium necessária",
-                text: "A reprodução completa requer Spotify Premium.",
-                background: "#1a1a1a",
-                color: "#fff",
-                confirmButtonColor: "#cc0000"
-            });
-        });
-
-        spotifyPlayer.connect();
-    };
+function iniciarSDK() {
+    // Se a SDK já carregou antes do JS, dispara manualmente
+    if (window.Spotify) {
+        window.onSpotifyWebPlaybackSDKReady();
+    }
 }
 
 function atualizarBotaoPlayer(conectado) {
@@ -454,6 +458,9 @@ async function buscarFaixas(playlistId, playlistNome, indice = 0) {
     const artistId = ARTISTAS_FAIXAS[indice % ARTISTAS_FAIXAS.length];
     const token    = await getToken();
 
+    // delay escalonado por índice para não disparar tudo ao mesmo tempo
+    await delay(indice * 800);
+
     const albumsResp = await fetchComRetry(
         "https://api.spotify.com/v1/artists/" + artistId + "/albums?offset=0", token
     );
@@ -463,7 +470,7 @@ async function buscarFaixas(playlistId, playlistNome, indice = 0) {
     const albums     = albumsData?.items?.filter(Boolean) || [];
     if (!albums.length) return [];
 
-    await delay(300);
+    await delay(500);
 
     const albumId    = albums[0].id;
     const tracksResp = await fetchComRetry(
