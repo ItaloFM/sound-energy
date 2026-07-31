@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=New+Rocker&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=New+Rocker&family=Roboto+Mono:wght@300;400;500;600;700&display=swap');
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "New Rocker", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Roboto Mono", monospace;
 }
 
 body {
@@ -48,8 +48,6 @@ body {
   text-decoration: none;
   white-space: nowrap;
 }
-
-/* Barra de busca central */
 .navbar-search {
   flex: 1;
   max-width: 420px;
