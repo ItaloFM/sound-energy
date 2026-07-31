@@ -503,7 +503,7 @@ async function buscarFaixas(playlistId, playlistNome, indice = 0) {
         }
     }
 
-    // Fallback — queries simples que funcionam no browser
+    // Fallback — queries simples que funcionam no browser (v4)
     const token2 = await getOAuthTokenValido() || await getToken();
     const queries = ["pop", "rock", "soul", "jazz"];
     const q = queries[indice % queries.length];
