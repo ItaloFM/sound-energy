@@ -503,14 +503,14 @@ async function buscarFaixas(playlistId, playlistNome, indice = 0) {
         }
     }
 
-    // Fallback — usa indice para variar a query (v5)
-    const token2 = await getOAuthTokenValido() || await getToken();
+    // Fallback — usa client_credentials (não OAuth) para evitar restrições
+    const tokenCC = await getToken(); // client_credentials
     const queries = ["pop", "rock", "soul", "jazz"];
     const q = queries[indice % queries.length];
     console.log("Search fallback query:", q);
     const r2 = await fetch(
         "https://api.spotify.com/v1/search?q=" + q + "&type=track&limit=20",
-        { headers: { "Authorization": "Bearer " + token2 } }
+        { headers: { "Authorization": "Bearer " + tokenCC } }
     );
     console.log("Search fallback status:", r2.status);
     if (r2.ok) {
