@@ -430,6 +430,23 @@ function carregarUsuarioNavbar() {
 //  API — PLAYLISTS E FAIXAS
 // ─────────────────────────────────────────
 async function buscarPlaylistsDestaque() {
+    // Se tem OAuth, busca as playlists do próprio usuário
+    const oauthToken = await getOAuthTokenValido();
+    if (oauthToken) {
+        const r = await fetch("https://api.spotify.com/v1/me/playlists?limit=4", {
+            headers: { "Authorization": "Bearer " + oauthToken }
+        });
+        if (r.ok) {
+            const data = await r.json();
+            const playlists = data?.items?.filter(Boolean) || [];
+            if (playlists.length > 0) {
+                console.log("Playlists do usuário carregadas:", playlists.length);
+                return playlists;
+            }
+        }
+    }
+
+    // Fallback — playlists em destaque via client credentials
     const data  = await spotifyFetch("/search?q=Top+50&type=playlist&limit=10&market=BR");
     const todas = data?.playlists?.items?.filter(Boolean) || [];
     console.log("Playlists recebidas:", todas.length);
