@@ -455,10 +455,25 @@ async function fetchComRetry(url, token, tentativas = 3) {
 }
 
 async function buscarFaixas(playlistId, playlistNome, indice = 0) {
+    // Se tem OAuth token, busca direto da playlist do Spotify (1 requisição)
+    const oauthToken = await getOAuthTokenValido();
+    if (oauthToken) {
+        const r = await fetch(
+            "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks?limit=20",
+            { headers: { "Authorization": "Bearer " + oauthToken } }
+        );
+        if (r.ok) {
+            const data = await r.json();
+            return (data?.items || [])
+                .map(item => item?.track)
+                .filter(Boolean);
+        }
+    }
+
+    // Fallback sem OAuth — usa artistas fixos
     const artistId = ARTISTAS_FAIXAS[indice % ARTISTAS_FAIXAS.length];
     const token    = await getToken();
 
-    // sem delay escalonado — só carrega quando o usuário clica
     const albumsResp = await fetchComRetry(
         "https://api.spotify.com/v1/artists/" + artistId + "/albums?offset=0", token
     );
