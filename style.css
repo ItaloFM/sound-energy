@@ -872,21 +872,30 @@ body {
 
 /* Celular pequeno (até 480px) */
 @media (max-width: 480px) {
-  .navbar-search { display: none; }
+  /* Barra de busca vira linha separada abaixo da navbar */
+  .navbar-inner {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 8px 0 4px 0;
+  }
+
+  .navbar-search {
+    order: 3;
+    max-width: 100%;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .navbar {
+    height: auto !important;
+  }
+
+  .app-wrapper {
+    margin-top: 96px;
+  }
+
   .navbar-logo .navbar-brand { font-size: 15px; }
-
-  .playlist-hero-cover { height: 120px; }
-
   .player-buttons { gap: 8px; }
   .player-btn svg  { width: 16px; height: 16px; }
   .player-play-btn { width: 32px; height: 32px; }
-
-  /* Mostra botão de busca na navbar em vez da barra */
-  .navbar-search-toggle {
-    display: flex !important;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-  }
 }
