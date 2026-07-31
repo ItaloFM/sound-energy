@@ -503,12 +503,12 @@ async function buscarFaixas(playlistId, playlistNome, indice = 0) {
         }
     }
 
-    // Fallback — top tracks do Brasil via OAuth search
+    // Fallback — top tracks via OAuth search com query simples
     const token2 = await getOAuthTokenValido() || await getToken();
-    const queries = ["hits brasil 2026", "musica brasileira", "sertanejo", "pagode"];
+    const queries = ["sertanejo", "pagode", "funk", "axe"];
     const q = queries[indice % queries.length];
     const r2 = await fetch(
-        "https://api.spotify.com/v1/search?q=" + encodeURIComponent(q) + "&type=track&limit=20",
+        "https://api.spotify.com/v1/search?q=" + q + "&type=track&limit=20",
         { headers: { "Authorization": "Bearer " + token2 } }
     );
     if (r2.ok) {
@@ -591,7 +591,6 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
         const oauthToken = await getOAuthTokenValido();
         if (!oauthToken) { loginSpotify(); return; }
 
-        // Se device sumiu, tenta reconectar a SDK
         if (!deviceId || !sdkPronto) {
             console.warn("Device ID não encontrado, reconectando SDK...");
             if (spotifyPlayer) spotifyPlayer.connect();
@@ -599,6 +598,16 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
         }
 
         if (deviceId && oauthToken) {
+            // Transfere reprodução para o device primeiro
+            await fetch("https://api.spotify.com/v1/me/player", {
+                method: "PUT",
+                headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
+                body: JSON.stringify({ device_ids: [deviceId], play: false })
+            });
+
+            await delay(800);
+
+            // Agora inicia a playlist
             const resp = await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
                 method: "PUT",
                 headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
