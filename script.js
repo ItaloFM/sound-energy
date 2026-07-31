@@ -11,7 +11,9 @@ const SCOPES = [
     "user-read-email",
     "user-read-private",
     "user-read-playback-state",
-    "user-modify-playback-state"
+    "user-modify-playback-state",
+    "playlist-read-private",
+    "playlist-read-collaborative"
 ].join(" ");
 
 let accessToken    = null;
@@ -394,7 +396,8 @@ function carregarUsuarioNavbar() {
     $(".navbar-user").on("click", function () {
         const temOAuth = !!getOAuthToken();
         const opcoes   = temOAuth
-            ? `<button id="swal-logout" class="swal-btn swal-btn-red">Sair</button>`
+            ? `<button id="swal-spotify" class="swal-btn swal-btn-green">🔄 Reconectar Spotify</button>
+               <button id="swal-logout" class="swal-btn swal-btn-red">Sair</button>`
             : `<button id="swal-spotify" class="swal-btn swal-btn-green">🎵 Conectar Spotify Premium</button>
                <button id="swal-logout" class="swal-btn swal-btn-red">Sair</button>`;
 
@@ -411,6 +414,10 @@ function carregarUsuarioNavbar() {
                     window.location.href = "login.html";
                 });
                 document.getElementById("swal-spotify")?.addEventListener("click", () => {
+                    // Limpa token antigo para forçar novo login com escopos atualizados
+                    localStorage.removeItem("se_oauth_token");
+                    localStorage.removeItem("se_oauth_refresh");
+                    localStorage.removeItem("se_oauth_expires_at");
                     Swal.close();
                     loginSpotify();
                 });
