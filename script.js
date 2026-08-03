@@ -199,23 +199,23 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
         atualizarProgressoSDK(state);
     });
 
-spotifyPlayer.addListener("authentication_error", ({ message }) => {
-    console.error("Erro de autenticação:", message);
-});
-
-spotifyPlayer.addListener("account_error", ({ message }) => {
-    console.error("Erro de conta:", message);
-    Swal.fire({
-        icon: "error",
-        title: "Conta Premium necessária",
-        text: "A reprodução completa requer Spotify Premium.",
-        background: "#1a1a1a",
-        color: "#fff",
-        confirmButtonColor: "#cc0000"
+    spotifyPlayer.addListener("authentication_error", ({ message }) => {
+        console.error("Erro de autenticação:", message);
     });
-});
 
-spotifyPlayer.connect();
+    spotifyPlayer.addListener("account_error", ({ message }) => {
+        console.error("Erro de conta:", message);
+        Swal.fire({
+            icon: "error",
+            title: "Conta Premium necessária",
+            text: "A reprodução completa requer Spotify Premium.",
+            background: "#1a1a1a",
+            color: "#fff",
+            confirmButtonColor: "#cc0000"
+        });
+    });
+
+    spotifyPlayer.connect();
 };
 
 function iniciarSDK() {
@@ -354,7 +354,7 @@ function setIconePlay(tocando) {
 
 // Estado de shuffle e repeat
 let shuffleAtivo = false;
-let repeatAtivo  = false;
+let repeatAtivo = false;
 
 function iniciarControlesPlayer() {
     // Play/Pause
@@ -407,7 +407,7 @@ function iniciarControlesPlayer() {
     let isDraggingProgress = false;
 
     function posicaoBarra(e, el) {
-        const rect   = el.getBoundingClientRect();
+        const rect = el.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     }
@@ -750,7 +750,7 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
             // Se 404, tenta forçar via SDK diretamente
             if (resp.status === 404 && spotifyPlayer) {
                 console.warn("Device inativo, tentando via SDK...");
-                await spotifyPlayer.resume().catch(() => {});
+                await spotifyPlayer.resume().catch(() => { });
             } else if (resp.ok || resp.status === 204) {
                 setIconePlay(true);
             }
@@ -857,6 +857,13 @@ function mostrarToast(nome, artista, img) {
 //  INICIALIZAÇÃO
 // ─────────────────────────────────────────
 $(document).ready(async function () {
+    // Registra o Service Worker para PWA
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sound-energy/service-worker.js")
+            .then(() => console.log("✅ Service Worker registrado"))
+            .catch(e => console.warn("SW erro:", e));
+    }
+
     console.log("Inicializando Sound Energy...");
 
     if (!localStorage.getItem("se_usuario") && !localStorage.getItem("se_spotify_user")) {

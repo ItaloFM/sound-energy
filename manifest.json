@@ -1,0 +1,20 @@
+{
+    "name": "Sound Energy",
+    "short_name": "Sound Energy",
+    "start_url": "/sound-energy/index.html",
+    "display": "standalone",
+    "background_color": "#121212",
+    "theme_color": "#181818",
+    "icons": [
+        {
+            "src": "imgs/2243c3de-9ed4-4bf6-8874-9e36f36f4d09.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "imgs/2243c3de-9ed4-4bf6-8874-9e36f36f4d09.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
