@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────
 const CLIENT_ID    = "26a4960d1ff049cd856ef4656003a29b";
 const CLIENT_SECRET = "3cb3856472234558908489932951c911";
-const REDIRECT_URI = "https://italofm.github.io/sound-energy/callback.html";
+const REDIRECT_URI = "https://italofm.github.io/sound-energy/callback/callback.html";
 
 // Escopos necessários para reprodução completa
 const SCOPES = [
@@ -425,12 +425,12 @@ function carregarUsuarioNavbar() {
             didOpen: () => {
                 document.getElementById("swal-perfil")?.addEventListener("click", () => {
                     Swal.close();
-                    window.location.href = "profile.html";
+                    window.location.href = "PROFILLE/profile.html";
                 });
                 document.getElementById("swal-logout")?.addEventListener("click", () => {
                     localStorage.clear();
                     Swal.close();
-                    window.location.href = "login.html";
+                    window.location.href = "login/login.html";
                 });
                 document.getElementById("swal-spotify")?.addEventListener("click", () => {
                     // Limpa só o token, mantém a SDK conectada
@@ -736,7 +736,7 @@ $(document).ready(async function () {
     console.log("Inicializando Sound Energy...");
 
     if (!localStorage.getItem("se_usuario") && !localStorage.getItem("se_spotify_user")) {
-        window.location.href = "login.html";
+        window.location.href = "login/login.html";
         return;
     }
 
@@ -748,7 +748,7 @@ $(document).ready(async function () {
     $("#navbar-search-input").on("keydown", function (e) {
         if (e.key === "Enter") {
             const q = $(this).val().trim();
-            if (q) window.location.href = "search.html?q=" + encodeURIComponent(q);
+            if (q) window.location.href = "search/search.html?q=" + encodeURIComponent(q);
         }
     });
 

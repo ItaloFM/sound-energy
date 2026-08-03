@@ -2,7 +2,7 @@ $(document).ready(function () {
 
     // Se já está logado, vai direto para o index
     if (localStorage.getItem("se_usuario")) {
-        window.location.href = "index.html";
+        window.location.href = "../index.html";
         return;
     }
 
@@ -49,7 +49,7 @@ $(document).ready(function () {
         });
 
         setTimeout(function () {
-            window.location.href = "index.html";
+            window.location.href = "../index.html";
         }, 1500);
     });
 

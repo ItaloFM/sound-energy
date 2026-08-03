@@ -83,7 +83,7 @@ async function carregarPerfil() {
     $("#navbar-username").text(spotifyUser?.nome || localUser || "Perfil");
 
     // Clique no avatar — voltar para início
-    $("#navbar-user").on("click", () => window.location.href = "index.html");
+    $("#navbar-user").on("click", () => window.location.href = "../index.html");
 
     // Se tem usuário do Spotify, usa dados dele
     if (spotifyUser) {
@@ -144,7 +144,7 @@ async function carregarPlaylists() {
         `);
 
         card.on("click", () => {
-            window.location.href = "index.html";
+            window.location.href = "../index.html";
         });
 
         grid.append(card);
@@ -184,7 +184,7 @@ async function carregarArtistas() {
 $(document).ready(async function () {
     // Redireciona para login se não estiver autenticado
     if (!localStorage.getItem("se_usuario") && !localStorage.getItem("se_spotify_user")) {
-        window.location.href = "login.html";
+        window.location.href = "../login/login.html";
         return;
     }
 
