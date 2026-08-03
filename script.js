@@ -160,6 +160,11 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
         sdkPronto = true;
         console.log("✅ Spotify SDK pronta. Device ID:", device_id);
         atualizarBotaoPlayer(true);
+
+        // Ativa o elemento para o Spotify reconhecer o device
+        if (spotifyPlayer.activateElement) {
+            spotifyPlayer.activateElement();
+        }
     });
 
     spotifyPlayer.addListener("not_ready", ({ device_id }) => {
@@ -265,6 +270,9 @@ async function tocarFaixa(track, idx) {
         const oauthToken = await getOAuthTokenValido();
         if (oauthToken && track.uri) {
             try {
+                // Ativa o device antes de qualquer comando
+                if (spotifyPlayer?.activateElement) await spotifyPlayer.activateElement();
+
                 const uris = filaFaixas.slice(idx).map(t => t.uri).filter(Boolean);
                 const body = uris.length > 0
                     ? JSON.stringify({ uris: uris.slice(0, 50) })
@@ -650,6 +658,9 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
         }
 
         try {
+            // Ativa o device antes de qualquer comando
+            if (spotifyPlayer?.activateElement) await spotifyPlayer.activateElement();
+
             // Transfere reprodução para o device
             const transferResp = await fetch("https://api.spotify.com/v1/me/player", {
                 method: "PUT",
