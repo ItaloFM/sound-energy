@@ -191,28 +191,36 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
 
             // Atualiza título da aba
             document.title = `${nome} • ${artistas} — Sound Energy`;
+
+            // Toast de notificação
+            mostrarToast(nome, artistas, img);
+
+            // ← ADICIONA AQUI
+            mostrarToast(nome, artistas, img);
         }
+        document.title = `${nome} • ${artistas} — Sound Energy`;
+    }
         setIconePlay(!state.paused);
-        atualizarProgressoSDK(state);
-    });
+    atualizarProgressoSDK(state);
+});
 
-    spotifyPlayer.addListener("authentication_error", ({ message }) => {
-        console.error("Erro de autenticação:", message);
-    });
+spotifyPlayer.addListener("authentication_error", ({ message }) => {
+    console.error("Erro de autenticação:", message);
+});
 
-    spotifyPlayer.addListener("account_error", ({ message }) => {
-        console.error("Erro de conta:", message);
-        Swal.fire({
-            icon: "error",
-            title: "Conta Premium necessária",
-            text: "A reprodução completa requer Spotify Premium.",
-            background: "#1a1a1a",
-            color: "#fff",
-            confirmButtonColor: "#cc0000"
-        });
+spotifyPlayer.addListener("account_error", ({ message }) => {
+    console.error("Erro de conta:", message);
+    Swal.fire({
+        icon: "error",
+        title: "Conta Premium necessária",
+        text: "A reprodução completa requer Spotify Premium.",
+        background: "#1a1a1a",
+        color: "#fff",
+        confirmButtonColor: "#cc0000"
     });
+});
 
-    spotifyPlayer.connect();
+spotifyPlayer.connect();
 };
 
 function iniciarSDK() {
@@ -768,6 +776,23 @@ function injetarEstilos() {
 }
 
 // ─────────────────────────────────────────
+//  TOAST DE NOTIFICAÇÃO
+// ─────────────────────────────────────────
+let toastTimer = null;
+
+function mostrarToast(nome, artista, img) {
+    $("#toast-title").text(nome);
+    $("#toast-artist").text(artista);
+    $("#toast-img").attr("src", img);
+    $("#toast-player").addClass("show");
+
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+        $("#toast-player").removeClass("show");
+    }, 3000);
+}
+
+// ─────────────────────────────────────────
 //  INICIALIZAÇÃO
 // ─────────────────────────────────────────
 $(document).ready(async function () {
@@ -825,4 +850,7 @@ $(document).ready(async function () {
     $(".hero-meta-author").text(primeira.owner?.display_name || "Spotify");
     $(".hero-meta-stats").text("Clique em uma playlist para ver as músicas");
     $(".playlist-item").first().addClass("active");
+
+
+
 });

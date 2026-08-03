@@ -33,15 +33,19 @@
                 <!-- Barra de busca central -->
                 <div class="navbar-search" id="navbar-search">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="#b3b3b3">
-                        <path d="M7 1a6 6 0 1 0 3.745 10.745l3.006 3.005a.75.75 0 1 0 1.06-1.06l-3.005-3.006A6 6 0 0 0 7 1zm-4.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0z"/>
+                        <path
+                            d="M7 1a6 6 0 1 0 3.745 10.745l3.006 3.005a.75.75 0 1 0 1.06-1.06l-3.005-3.006A6 6 0 0 0 7 1zm-4.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0z" />
                     </svg>
-                    <input type="text" class="navbar-search-input" id="navbar-search-input" placeholder="O que você quer ouvir?" autocomplete="off">
+                    <input type="text" class="navbar-search-input" id="navbar-search-input"
+                        placeholder="O que você quer ouvir?" autocomplete="off">
                 </div>
 
                 <!-- Botão menu mobile -->
                 <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir playlists">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
-                        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                        <path d="M9 18V5l12-2v13" />
+                        <circle cx="6" cy="18" r="3" />
+                        <circle cx="18" cy="16" r="3" />
                     </svg>
                 </button>
 
@@ -49,8 +53,10 @@
                 <div class="navbar-user">
                     <div class="navbar-avatar">Í</div>
                     <span class="navbar-username">Ítako</span>
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="#b3b3b3"><path d="M2 5l6 6 6-6"/></svg>
-                    
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="#b3b3b3">
+                        <path d="M2 5l6 6 6-6" />
+                    </svg>
+
                 </div>
             </div>
         </nav>
@@ -141,7 +147,8 @@
             <section class="playlist-hero" id="playlist-hero">
                 <div class="playlist-hero-bg" id="playlist-hero-bg"></div>
                 <div class="playlist-hero-inner">
-                    <img src="imgs/playlist1.png" alt="Capa da playlist" class="playlist-hero-cover" id="playlist-hero-cover">
+                    <img src="imgs/playlist1.png" alt="Capa da playlist" class="playlist-hero-cover"
+                        id="playlist-hero-cover">
                     <div class="playlist-hero-info">
                         <span class="playlist-hero-type">Playlist pública</span>
                         <h1 class="playlist-hero-title" id="playlist-hero-title">Chrome Heart</h1>
@@ -159,31 +166,52 @@
                 <div class="playlist-actions">
                     <div class="playlist-actions-left">
                         <button class="action-play" aria-label="Play">
-                            <svg width="20" height="20" viewBox="0 0 16 16" fill="black"><path d="M3 2.5l10 5.5-10 5.5V2.5z"/></svg>
+                            <svg width="20" height="20" viewBox="0 0 16 16" fill="black">
+                                <path d="M3 2.5l10 5.5-10 5.5V2.5z" />
+                            </svg>
                         </button>
                         <button class="action-icon" aria-label="Now playing">
-                            <img src="imgs/playlist1.png" alt="" width="28" height="28" style="border-radius:4px; object-fit:cover;">
+                            <img src="imgs/playlist1.png" alt="" width="28" height="28"
+                                style="border-radius:4px; object-fit:cover;">
                         </button>
                         <button class="action-icon" aria-label="Smart shuffle">
-                            <svg width="18" height="18" viewBox="0 0 16 16" fill="#1ed760"><path d="M1 4h2l2 4-2 4H1L3 8 1 4zm8-1l4 5-4 5V9.5L6.5 8 9 6.5V3zm-2 5.5L9 8l-2-.5V8.5z"/></svg>
+                            <svg width="18" height="18" viewBox="0 0 16 16" fill="#1ed760">
+                                <path
+                                    d="M1 4h2l2 4-2 4H1L3 8 1 4zm8-1l4 5-4 5V9.5L6.5 8 9 6.5V3zm-2 5.5L9 8l-2-.5V8.5z" />
+                            </svg>
                         </button>
                         <button class="action-icon" aria-label="Download">
-                            <svg width="18" height="18" viewBox="0 0 16 16" fill="#b3b3b3"><path d="M8 1v9.586L5.707 8.293l-1.414 1.414L8 13.414l3.707-3.707-1.414-1.414L8 10.586V1H8zM2 14h12v1H2v-1z"/></svg>
+                            <svg width="18" height="18" viewBox="0 0 16 16" fill="#b3b3b3">
+                                <path
+                                    d="M8 1v9.586L5.707 8.293l-1.414 1.414L8 13.414l3.707-3.707-1.414-1.414L8 10.586V1H8zM2 14h12v1H2v-1z" />
+                            </svg>
                         </button>
                         <button class="action-icon" aria-label="Adicionar usuário">
-                            <svg width="18" height="18" viewBox="0 0 16 16" fill="#b3b3b3"><path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10zM13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/></svg>
+                            <svg width="18" height="18" viewBox="0 0 16 16" fill="#b3b3b3">
+                                <path
+                                    d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10zM13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z" />
+                            </svg>
                         </button>
                         <button class="action-icon" aria-label="Mais opções">
-                            <svg width="18" height="18" viewBox="0 0 16 16" fill="#b3b3b3"><circle cx="2" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="14" cy="8" r="1.5"/></svg>
+                            <svg width="18" height="18" viewBox="0 0 16 16" fill="#b3b3b3">
+                                <circle cx="2" cy="8" r="1.5" />
+                                <circle cx="8" cy="8" r="1.5" />
+                                <circle cx="14" cy="8" r="1.5" />
+                            </svg>
                         </button>
                     </div>
                     <div class="playlist-actions-right">
                         <button class="action-icon" aria-label="Buscar">
-                            <svg width="18" height="18" viewBox="0 0 16 16" fill="#b3b3b3"><path d="M7 1a6 6 0 1 0 3.745 10.745l3.006 3.005a.75.75 0 1 0 1.06-1.06l-3.005-3.006A6 6 0 0 0 7 1zm-4.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0z"/></svg>
+                            <svg width="18" height="18" viewBox="0 0 16 16" fill="#b3b3b3">
+                                <path
+                                    d="M7 1a6 6 0 1 0 3.745 10.745l3.006 3.005a.75.75 0 1 0 1.06-1.06l-3.005-3.006A6 6 0 0 0 7 1zm-4.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0z" />
+                            </svg>
                         </button>
                         <span class="action-order-label">Ordem personalizada</span>
                         <button class="action-icon" aria-label="Ordenar">
-                            <svg width="18" height="18" viewBox="0 0 16 16" fill="#b3b3b3"><path d="M1 3h14v1.5L9 10v5l-2-1V10L1 4.5V3z"/></svg>
+                            <svg width="18" height="18" viewBox="0 0 16 16" fill="#b3b3b3">
+                                <path d="M1 3h14v1.5L9 10v5l-2-1V10L1 4.5V3z" />
+                            </svg>
                         </button>
                     </div>
                 </div>
@@ -201,7 +229,7 @@
             </div>
             <button class="player-heart" aria-label="Curtir">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#b3b3b3" stroke-width="1.5">
-                    <path d="M8 13.5S1.5 9.5 1.5 5.5a3 3 0 0 1 6-0.5 3 3 0 0 1 6 0.5c0 4-6.5 8-6.5 8z"/>
+                    <path d="M8 13.5S1.5 9.5 1.5 5.5a3 3 0 0 1 6-0.5 3 3 0 0 1 6 0.5c0 4-6.5 8-6.5 8z" />
                 </svg>
             </button>
         </div>
@@ -212,31 +240,31 @@
                 <!-- Shuffle -->
                 <button class="player-btn" aria-label="Shuffle">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b3b3b3" stroke-width="1.8">
-                        <path d="M16 3h5v5M4 20l16-16M16 20h5v-5M4 4l16 16"/>
+                        <path d="M16 3h5v5M4 20l16-16M16 20h5v-5M4 4l16 16" />
                     </svg>
                 </button>
                 <!-- Previous -->
                 <button class="player-btn" aria-label="Anterior">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="#b3b3b3">
-                        <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
+                        <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" />
                     </svg>
                 </button>
                 <!-- Play/Pause -->
                 <button class="player-play-btn" aria-label="Play" id="player-play-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="black" id="play-icon">
-                        <path d="M8 5v14l11-7z"/>
+                        <path d="M8 5v14l11-7z" />
                     </svg>
                 </button>
                 <!-- Next -->
                 <button class="player-btn" aria-label="Próxima">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="#b3b3b3">
-                        <path d="M6 18l8.5-6L6 6v12zm2.5-6L12 9v6z M16 6h2v12h-2z"/>
+                        <path d="M6 18l8.5-6L6 6v12zm2.5-6L12 9v6z M16 6h2v12h-2z" />
                     </svg>
                 </button>
                 <!-- Repeat -->
                 <button class="player-btn" aria-label="Repetir">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b3b3b3" stroke-width="1.8">
-                        <path d="M17 2l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/>
+                        <path d="M17 2l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3" />
                     </svg>
                 </button>
             </div>
@@ -254,7 +282,7 @@
         <!-- Volume -->
         <div class="player-volume">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="#b3b3b3">
-                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05A4.5 4.5 0 0 0 16.5 12z"/>
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05A4.5 4.5 0 0 0 16.5 12z" />
             </svg>
             <div class="volume-bar">
                 <div class="volume-bar-fill" style="width: 65%"></div>
@@ -263,6 +291,24 @@
         </div>
     </footer>
 
+    <div class="toast-player" id="toast-player">
+        <img src="" id="toast-img" alt="">
+        <div>
+            <div class="toast-title" id="toast-title"></div>
+            <div class="toast-artist" id="toast-artist"></div>
+        </div>
+    </div>
+
+
+
+    <!-- Toast de notificação -->
+    <div class="toast-player" id="toast-player">
+        <img src="" id="toast-img" alt="">
+        <div>
+            <div class="toast-title" id="toast-title"></div>
+            <div class="toast-artist" id="toast-artist"></div>
+        </div>
+    </div>
 
     <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
     <script src="script.js?v=9"></script>
