@@ -1301,3 +1301,38 @@ body {
     text-overflow: ellipsis;
     max-width: 180px;
 }
+
+/* ───────────────────────────────
+   BOTÕES ATIVOS (shuffle / repeat)
+─────────────────────────────── */
+.player-btn.btn-ativo svg {
+  stroke: #cc0000 !important;
+  fill: #cc0000 !important;
+}
+
+.player-btn.btn-ativo {
+  position: relative;
+}
+
+.player-btn.btn-ativo::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background-color: #cc0000;
+  border-radius: 50%;
+}
+
+/* Cursor drag nas barras */
+.player-bar,
+.volume-bar {
+  cursor: grab;
+}
+
+.player-bar:active,
+.volume-bar:active {
+  cursor: grabbing;
+}

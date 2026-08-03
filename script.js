@@ -247,6 +247,7 @@ function atualizarProgressoSDK(state) {
         $("#player-bar-fill").css("width", pct + "%");
         $("#player-bar-thumb").css("left", pct + "%");
         $("#player-current").text(msParaMinutos(pos));
+        $("#player-remaining").text("-" + msParaMinutos(dur - pos));
         pos += 250;
         if (pos > dur) pos = dur;
     }
@@ -337,6 +338,7 @@ function atualizarProgressoAudio() {
     $("#player-bar-fill").css("width", pct + "%");
     $("#player-bar-thumb").css("left", pct + "%");
     $("#player-current").text(msParaMinutos(audio.currentTime * 1000));
+    $("#player-remaining").text("-" + msParaMinutos((audio.duration - audio.currentTime) * 1000));
 }
 
 // ─────────────────────────────────────────
@@ -350,22 +352,18 @@ function setIconePlay(tocando) {
     }
 }
 
+// Estado de shuffle e repeat
+let shuffleAtivo = false;
+let repeatAtivo  = false;
+
 function iniciarControlesPlayer() {
     // Play/Pause
     $("#player-play-btn").on("click", async function () {
-        if (sdkPronto && spotifyPlayer) {
-            spotifyPlayer.togglePlay();
-            return;
-        }
-        // fallback audio
+        if (sdkPronto && spotifyPlayer) { spotifyPlayer.togglePlay(); return; }
         if (audio.src && !audio.paused) {
-            audio.pause();
-            clearInterval(progressTimer);
-            setIconePlay(false);
+            audio.pause(); clearInterval(progressTimer); setIconePlay(false);
         } else if (audio.src) {
-            audio.play();
-            progressTimer = setInterval(atualizarProgressoAudio, 250);
-            setIconePlay(true);
+            audio.play(); progressTimer = setInterval(atualizarProgressoAudio, 250); setIconePlay(true);
         }
     });
 
@@ -381,26 +379,106 @@ function iniciarControlesPlayer() {
         if (tocandoIdx > 0) tocarFaixa(filaFaixas[tocandoIdx - 1], tocandoIdx - 1);
     });
 
-    // Barra de progresso
-    $(".player-bar").on("click", async function (e) {
-        const rect = this.getBoundingClientRect();
-        const pct = (e.clientX - rect.left) / rect.width;
-        if (sdkPronto && spotifyPlayer) {
-            const state = await spotifyPlayer.getCurrentState();
-            if (state) spotifyPlayer.seek(pct * state.duration);
-            return;
+    // ── Shuffle ──
+    $("[aria-label='Shuffle']").on("click", async function () {
+        shuffleAtivo = !shuffleAtivo;
+        $(this).toggleClass("btn-ativo", shuffleAtivo);
+        if (sdkPronto) {
+            const t = await getOAuthTokenValido();
+            if (t) await fetch("https://api.spotify.com/v1/me/player/shuffle?state=" + shuffleAtivo, {
+                method: "PUT", headers: { "Authorization": "Bearer " + t }
+            });
         }
-        if (audio.duration) audio.currentTime = pct * audio.duration;
     });
 
-    // Volume
-    $(".volume-bar").on("click", function (e) {
-        const rect = this.getBoundingClientRect();
-        const vol = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    // ── Repeat ──
+    $("[aria-label='Repetir']").on("click", async function () {
+        repeatAtivo = !repeatAtivo;
+        $(this).toggleClass("btn-ativo", repeatAtivo);
+        if (sdkPronto) {
+            const t = await getOAuthTokenValido();
+            if (t) await fetch("https://api.spotify.com/v1/me/player/repeat?state=" + (repeatAtivo ? "context" : "off"), {
+                method: "PUT", headers: { "Authorization": "Bearer " + t }
+            });
+        }
+    });
+
+    // ── Progresso — clique e drag ──
+    let isDraggingProgress = false;
+
+    function posicaoBarra(e, el) {
+        const rect   = el.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    }
+
+    async function aplicarProgresso(pct) {
+        if (sdkPronto && spotifyPlayer) {
+            const state = await spotifyPlayer.getCurrentState();
+            if (state) {
+                spotifyPlayer.seek(pct * state.duration);
+                // Atualiza tempo restante
+                const restante = state.duration - pct * state.duration;
+                $("#player-remaining").text("-" + msParaMinutos(restante));
+            }
+        } else if (audio.duration) {
+            audio.currentTime = pct * audio.duration;
+        }
+    }
+
+    $(".player-bar").on("mousedown touchstart", function (e) {
+        isDraggingProgress = true;
+        const pct = posicaoBarra(e, this);
+        $("#player-bar-fill").css("width", (pct * 100) + "%");
+        $("#player-bar-thumb").css("left", (pct * 100) + "%");
+        e.preventDefault();
+    });
+
+    $(document).on("mousemove touchmove", function (e) {
+        if (!isDraggingProgress) return;
+        const pct = posicaoBarra(e, $(".player-bar")[0]);
+        $("#player-bar-fill").css("width", (pct * 100) + "%");
+        $("#player-bar-thumb").css("left", (pct * 100) + "%");
+    });
+
+    $(document).on("mouseup touchend", async function (e) {
+        if (!isDraggingProgress) return;
+        isDraggingProgress = false;
+        await aplicarProgresso(posicaoBarra(e, $(".player-bar")[0]));
+    });
+
+    $(".player-bar").on("click", async function (e) {
+        if (isDraggingProgress) return;
+        await aplicarProgresso(posicaoBarra(e, this));
+    });
+
+    // ── Volume — clique e drag ──
+    let isDraggingVolume = false;
+
+    function aplicarVolume(pct) {
+        const vol = Math.max(0, Math.min(1, pct));
         if (spotifyPlayer) spotifyPlayer.setVolume(vol);
         audio.volume = vol;
         $(".volume-bar-fill").css("width", (vol * 100) + "%");
         $(".volume-bar-thumb").css("left", (vol * 100) + "%");
+    }
+
+    $(".volume-bar").on("mousedown touchstart", function (e) {
+        isDraggingVolume = true;
+        aplicarVolume(posicaoBarra(e, this));
+        e.preventDefault();
+    });
+
+    $(document).on("mousemove touchmove", function (e) {
+        if (!isDraggingVolume) return;
+        aplicarVolume(posicaoBarra(e, $(".volume-bar")[0]));
+    });
+
+    $(document).on("mouseup touchend", function () { isDraggingVolume = false; });
+
+    $(".volume-bar").on("click", function (e) {
+        if (isDraggingVolume) return;
+        aplicarVolume(posicaoBarra(e, this));
     });
 }
 
