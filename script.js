@@ -659,17 +659,23 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
         }
 
         try {
-            // Ativa o device antes de qualquer comando
+            // Ativa o device via SDK (mais confiável que API REST)
             if (spotifyPlayer?.activateElement) await spotifyPlayer.activateElement();
 
-            // Inicia direto sem transferir — device_id na URL já direciona corretamente
             const resp = await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
                 method: "PUT",
                 headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
                 body: JSON.stringify({ context_uri: "spotify:playlist:" + playlistId })
             });
             console.log("Play status:", resp.status);
-            if (resp.ok || resp.status === 204) setIconePlay(true);
+
+            // Se 404, tenta forçar via SDK diretamente
+            if (resp.status === 404 && spotifyPlayer) {
+                console.warn("Device inativo, tentando via SDK...");
+                await spotifyPlayer.resume().catch(() => {});
+            } else if (resp.ok || resp.status === 204) {
+                setIconePlay(true);
+            }
 
         } catch (e) {
             console.error("Erro ao tocar playlist:", e);
