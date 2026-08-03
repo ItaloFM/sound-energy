@@ -194,15 +194,10 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
 
             // Toast de notificação
             mostrarToast(nome, artistas, img);
-
-            // ← ADICIONA AQUI
-            mostrarToast(nome, artistas, img);
         }
-        document.title = `${nome} • ${artistas} — Sound Energy`;
-    }
         setIconePlay(!state.paused);
-    atualizarProgressoSDK(state);
-});
+        atualizarProgressoSDK(state);
+    });
 
 spotifyPlayer.addListener("authentication_error", ({ message }) => {
     console.error("Erro de autenticação:", message);
