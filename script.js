@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────
 //  CONFIGURAÇÃO
 // ─────────────────────────────────────────
-const CLIENT_ID    = "26a4960d1ff049cd856ef4656003a29b";
+const CLIENT_ID = "26a4960d1ff049cd856ef4656003a29b";
 const CLIENT_SECRET = "3cb3856472234558908489932951c911";
 const REDIRECT_URI = "https://italofm.github.io/sound-energy/callback/callback.html";
 
@@ -16,7 +16,7 @@ const SCOPES = [
     "playlist-read-collaborative"
 ].join(" ");
 
-let accessToken    = null;
+let accessToken = null;
 let tokenExpiresAt = 0;
 
 // ─────────────────────────────────────────
@@ -32,8 +32,8 @@ async function gerarToken() {
         body: "grant_type=client_credentials"
     });
     if (!response.ok) { console.error("Erro ao gerar token:", response.status); return null; }
-    const data     = await response.json();
-    accessToken    = data.access_token;
+    const data = await response.json();
+    accessToken = data.access_token;
     tokenExpiresAt = Date.now() + (data.expires_in - 60) * 1000;
     console.log("Token gerado. Expira em:", new Date(tokenExpiresAt).toLocaleTimeString());
     return accessToken;
@@ -78,15 +78,15 @@ async function refreshOAuthToken() {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
-            grant_type:    "refresh_token",
+            grant_type: "refresh_token",
             refresh_token: refreshToken,
-            client_id:     CLIENT_ID
+            client_id: CLIENT_ID
         })
     });
 
     const data = await r.json();
     if (data.access_token) {
-        localStorage.setItem("se_oauth_token",      data.access_token);
+        localStorage.setItem("se_oauth_token", data.access_token);
         localStorage.setItem("se_oauth_expires_at", Date.now() + (data.expires_in - 60) * 1000);
         if (data.refresh_token) localStorage.setItem("se_oauth_refresh", data.refresh_token);
         return data.access_token;
@@ -111,8 +111,8 @@ function base64url(buffer) {
 }
 
 async function gerarPKCE() {
-    const verifier  = base64url(crypto.getRandomValues(new Uint8Array(32)));
-    const digest    = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+    const verifier = base64url(crypto.getRandomValues(new Uint8Array(32)));
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
     const challenge = base64url(digest);
     return { verifier, challenge };
 }
@@ -121,12 +121,12 @@ async function loginSpotify() {
     const { verifier, challenge } = await gerarPKCE();
     localStorage.setItem("se_code_verifier", verifier);
     const url = "https://accounts.spotify.com/authorize?" + new URLSearchParams({
-        client_id:             CLIENT_ID,
-        response_type:         "code",
-        redirect_uri:          REDIRECT_URI,
+        client_id: CLIENT_ID,
+        response_type: "code",
+        redirect_uri: REDIRECT_URI,
         code_challenge_method: "S256",
-        code_challenge:        challenge,
-        scope:                 SCOPES
+        code_challenge: challenge,
+        scope: SCOPES
     });
     window.location.href = url;
 }
@@ -135,8 +135,8 @@ async function loginSpotify() {
 //  WEB PLAYBACK SDK
 // ─────────────────────────────────────────
 let spotifyPlayer = null;
-let deviceId      = null;
-let sdkPronto     = false;
+let deviceId = null;
+let sdkPronto = false;
 
 // A SDK chama essa função globalmente quando está pronta
 window.onSpotifyWebPlaybackSDKReady = async () => {
@@ -156,7 +156,7 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
     });
 
     spotifyPlayer.addListener("ready", ({ device_id }) => {
-        deviceId  = device_id;
+        deviceId = device_id;
         sdkPronto = true;
         console.log("✅ Spotify SDK pronta. Device ID:", device_id);
         atualizarBotaoPlayer(true);
@@ -165,20 +165,25 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
         if (spotifyPlayer.activateElement) {
             spotifyPlayer.activateElement();
         }
+
+        $("#sdk-badge").text("🟢 Conectado").removeClass("desconectado").addClass("conectado");
+
     });
 
     spotifyPlayer.addListener("not_ready", ({ device_id }) => {
         console.warn("SDK não disponível. Device ID:", device_id);
         sdkPronto = false;
+        $("#sdk-badge").text("🔴 Desconectado").removeClass("conectado").addClass("desconectado");
+        atualizarBotaoPlayer(false);
     });
 
     spotifyPlayer.addListener("player_state_changed", state => {
         if (!state) return;
         const track = state.track_window.current_track;
         if (track) {
-            const nome     = track.name;
+            const nome = track.name;
             const artistas = track.artists.map(a => a.name).join(", ");
-            const img      = track.album.images?.[2]?.url || track.album.images?.[0]?.url || "";
+            const img = track.album.images?.[2]?.url || track.album.images?.[0]?.url || "";
 
             $("#player-track-name").text(nome);
             $("#player-track-artist").text(artistas);
@@ -250,14 +255,14 @@ function atualizarProgressoSDK(state) {
 // ─────────────────────────────────────────
 //  TOCAR FAIXA
 // ─────────────────────────────────────────
-let filaUris   = [];
+let filaUris = [];
 let filaFaixas = [];
 let tocandoIdx = -1;
 
 async function tocarFaixa(track, idx) {
     // Atualiza UI imediatamente
     const artistas = track.artists?.map(a => a.name).join(", ") || "";
-    const thumb    = track.album?.images?.[2]?.url || track.album?.images?.[0]?.url || "";
+    const thumb = track.album?.images?.[2]?.url || track.album?.images?.[0]?.url || "";
     $("#player-track-name").text(track.name);
     $("#player-track-artist").text(artistas);
     if (thumb) $("#player-thumb").attr("src", thumb);
@@ -383,7 +388,7 @@ function iniciarControlesPlayer() {
     // Barra de progresso
     $(".player-bar").on("click", async function (e) {
         const rect = this.getBoundingClientRect();
-        const pct  = (e.clientX - rect.left) / rect.width;
+        const pct = (e.clientX - rect.left) / rect.width;
         if (sdkPronto && spotifyPlayer) {
             const state = await spotifyPlayer.getCurrentState();
             if (state) spotifyPlayer.seek(pct * state.duration);
@@ -395,7 +400,7 @@ function iniciarControlesPlayer() {
     // Volume
     $(".volume-bar").on("click", function (e) {
         const rect = this.getBoundingClientRect();
-        const vol  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        const vol = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
         if (spotifyPlayer) spotifyPlayer.setVolume(vol);
         audio.volume = vol;
         $(".volume-bar-fill").css("width", (vol * 100) + "%");
@@ -408,7 +413,7 @@ function iniciarControlesPlayer() {
 // ─────────────────────────────────────────
 function carregarUsuarioNavbar() {
     const spotifyUser = JSON.parse(localStorage.getItem("se_spotify_user") || "null");
-    const localUser   = localStorage.getItem("se_usuario");
+    const localUser = localStorage.getItem("se_usuario");
 
     if (spotifyUser) {
         if (spotifyUser.foto) {
@@ -424,7 +429,7 @@ function carregarUsuarioNavbar() {
 
     $(".navbar-user").on("click", function () {
         const temOAuth = !!getOAuthToken();
-        const opcoes   = temOAuth
+        const opcoes = temOAuth
             ? `<button id="swal-perfil" class="swal-btn swal-btn-gray">👤 Ver Perfil</button>
                <button id="swal-spotify" class="swal-btn swal-btn-green">🔄 Reconectar Spotify</button>
                <button id="swal-logout" class="swal-btn swal-btn-red">Sair</button>`
@@ -474,7 +479,7 @@ const PLAYLIST_IDS = [
 
 async function buscarPlaylistsDestaque() {
     const oauthToken = await getOAuthTokenValido();
-    const token      = oauthToken || await getToken();
+    const token = oauthToken || await getToken();
 
     const playlists = [];
     for (const id of PLAYLIST_IDS) {
@@ -573,10 +578,10 @@ function corDominante(imgEl, callback) {
     try {
         const canvas = document.createElement("canvas");
         canvas.width = canvas.height = 10;
-        const ctx    = canvas.getContext("2d");
+        const ctx = canvas.getContext("2d");
         ctx.drawImage(imgEl, 0, 0, 10, 10);
         const [r, g, b] = ctx.getImageData(4, 4, 1, 1).data;
-        const dark = `rgb(${Math.floor(r*.4)},${Math.floor(g*.4)},${Math.floor(b*.4)})`;
+        const dark = `rgb(${Math.floor(r * .4)},${Math.floor(g * .4)},${Math.floor(b * .4)})`;
         callback(`linear-gradient(160deg, rgb(${r},${g},${b}) 0%, ${dark} 50%, #121212 100%)`);
     } catch {
         callback("linear-gradient(160deg, #cc0000 0%, #8b0000 50%, #121212 100%)");
@@ -591,7 +596,7 @@ function renderizarSidebar(playlists) {
     lista.empty();
 
     playlists.forEach((pl, i) => {
-        const img  = pl.images?.[0]?.url || "imgs/playlist1.png";
+        const img = pl.images?.[0]?.url || "imgs/playlist1.png";
         const nome = pl.name || "Playlist";
         const dono = pl.owner?.display_name || "Spotify";
 
@@ -693,11 +698,12 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
         $("#playlist-hero-bg").css("opacity", 0).css("background", g).animate({ opacity: 1 }, 400);
     });
 
-    buscarFaixas(playlistId, nome, indice).then(faixas => {        filaFaixas = faixas;
-        const total    = faixas.length;
+    buscarFaixas(playlistId, nome, indice).then(faixas => {
+        filaFaixas = faixas;
+        const total = faixas.length;
         const durTotal = faixas.reduce((a, t) => a + (t?.duration_ms || 0), 0);
-        const min      = Math.floor(durTotal / 60000);
-        $(".hero-meta-stats").text(`${total} músicas • ${Math.floor(min/60)}h ${min%60}min`);
+        const min = Math.floor(durTotal / 60000);
+        $(".hero-meta-stats").text(`${total} músicas • ${Math.floor(min / 60)}h ${min % 60}min`);
         renderizarFaixas(faixas);
     });
 }
@@ -715,11 +721,11 @@ function renderizarFaixas(faixas) {
 
     faixas.forEach((track, i) => {
         if (!track) return;
-        const artistas   = track.artists?.map(a => a.name).join(", ") || "";
-        const album      = track.album?.name || "";
-        const duracao    = msParaMinutos(track.duration_ms || 0);
+        const artistas = track.artists?.map(a => a.name).join(", ") || "";
+        const album = track.album?.name || "";
+        const duracao = msParaMinutos(track.duration_ms || 0);
         const temPreview = !!track.preview_url;
-        const temUri     = !!track.uri;
+        const temUri = !!track.uri;
 
         const row = $(`
             <div class="song-row ${(!temPreview && !temUri) ? "no-preview" : ""}"
