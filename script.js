@@ -864,6 +864,55 @@ $(document).ready(async function () {
             .catch(e => console.warn("SW erro:", e));
     }
 
+    // Banner de instalação do PWA
+    let deferredPrompt = null;
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+
+        // Só mostra se o usuário ainda não instalou
+        if (!localStorage.getItem("se_pwa_installed")) {
+            setTimeout(() => {
+                Swal.fire({
+                    title: "📱 Instalar Sound Energy",
+                    html: `<p style="color:#b3b3b3;font-size:14px;margin-top:8px">
+                               Instale o app na sua tela inicial e acesse com um toque, sem abrir o browser.
+                           </p>`,
+                    showCancelButton: true,
+                    confirmButtonText: "Instalar",
+                    cancelButtonText: "Agora não",
+                    confirmButtonColor: "#cc0000",
+                    cancelButtonColor: "#2a2a2a",
+                    background: "#1a1a1a",
+                    color: "#fff",
+                    imageUrl: "imgs/2243c3de-9ed4-4bf6-8874-9e36f36f4d09.png",
+                    imageWidth: 80,
+                    imageHeight: 80,
+                    imageAlt: "Sound Energy"
+                }).then((result) => {
+                    if (result.isConfirmed && deferredPrompt) {
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then((choice) => {
+                            if (choice.outcome === "accepted") {
+                                localStorage.setItem("se_pwa_installed", "1");
+                                console.log("✅ PWA instalado");
+                            }
+                            deferredPrompt = null;
+                        });
+                    }
+                });
+            }, 3000); // Aguarda 3s para não aparecer imediatamente
+        }
+    });
+
+    // Detecta quando já foi instalado
+    window.addEventListener("appinstalled", () => {
+        localStorage.setItem("se_pwa_installed", "1");
+        deferredPrompt = null;
+        console.log("✅ PWA instalado com sucesso");
+    });
+
     console.log("Inicializando Sound Energy...");
 
     if (!localStorage.getItem("se_usuario") && !localStorage.getItem("se_spotify_user")) {

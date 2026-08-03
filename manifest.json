@@ -9,15 +9,18 @@
     "icons": [
         {
             "src": "imgs/2243c3de-9ed4-4bf6-8874-9e36f36f4d09.png",
-            "sizes": "192x192",
+            "sizes": "1024x1024",
             "type": "image/png",
             "purpose": "any maskable"
-        },
+        }
+    ],
+    "screenshots": [
         {
             "src": "imgs/2243c3de-9ed4-4bf6-8874-9e36f36f4d09.png",
-            "sizes": "512x512",
+            "sizes": "1024x1024",
             "type": "image/png",
-            "purpose": "any maskable"
+            "form_factor": "narrow",
+            "label": "Sound Energy"
         }
     ]
 }
