@@ -264,22 +264,30 @@ async function tocarFaixa(track, idx) {
     if (sdkPronto && deviceId) {
         const oauthToken = await getOAuthTokenValido();
         if (oauthToken && track.uri) {
-            // Toca a faixa específica + fila do restante
-            const uris = filaFaixas.slice(idx).map(t => t.uri).filter(Boolean);
-            const body = uris.length > 0
-                ? JSON.stringify({ uris: uris.slice(0, 50) })
-                : JSON.stringify({ uris: [track.uri] });
+            try {
+                const uris = filaFaixas.slice(idx).map(t => t.uri).filter(Boolean);
+                const body = uris.length > 0
+                    ? JSON.stringify({ uris: uris.slice(0, 50) })
+                    : JSON.stringify({ uris: [track.uri] });
 
-            await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
-                method: "PUT",
-                headers: {
-                    "Authorization": "Bearer " + oauthToken,
-                    "Content-Type": "application/json"
-                },
-                body: body
-            });
-            setIconePlay(true);
-            return;
+                // Transfere device antes de tocar
+                await fetch("https://api.spotify.com/v1/me/player", {
+                    method: "PUT",
+                    headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
+                    body: JSON.stringify({ device_ids: [deviceId], play: false })
+                });
+                await delay(800);
+
+                const resp = await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
+                    method: "PUT",
+                    headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
+                    body: body
+                });
+                console.log("Tocar faixa status:", resp.status);
+                if (resp.ok || resp.status === 204) { setIconePlay(true); return; }
+            } catch (e) {
+                console.error("Erro ao tocar faixa:", e);
+            }
         }
     }
 
@@ -627,23 +635,33 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
         const oauthToken = await getOAuthTokenValido();
         if (!oauthToken) { loginSpotify(); return; }
 
-        if (!deviceId || !sdkPronto) {
-            console.warn("Device ID não encontrado, reconectando SDK...");
-            if (spotifyPlayer) spotifyPlayer.connect();
-            await delay(2000);
+        if (!sdkPronto || !deviceId) {
+            Swal.fire({
+                icon: "info",
+                title: "Player não conectado",
+                text: "Conecte o Spotify Premium pelo avatar e tente novamente.",
+                background: "#1a1a1a",
+                color: "#fff",
+                confirmButtonColor: "#cc0000",
+                timer: 3000,
+                showConfirmButton: false
+            });
+            return;
         }
 
-        if (deviceId && oauthToken) {
-            // Transfere reprodução para o device primeiro
-            await fetch("https://api.spotify.com/v1/me/player", {
+        try {
+            // Transfere reprodução para o device
+            const transferResp = await fetch("https://api.spotify.com/v1/me/player", {
                 method: "PUT",
                 headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
                 body: JSON.stringify({ device_ids: [deviceId], play: false })
             });
+            console.log("Transfer status:", transferResp.status);
 
-            await delay(800);
+            // Aguarda o device ficar ativo
+            await delay(1000);
 
-            // Agora inicia a playlist
+            // Inicia a playlist
             const resp = await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
                 method: "PUT",
                 headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
@@ -651,6 +669,9 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
             });
             console.log("Play status:", resp.status);
             if (resp.ok || resp.status === 204) setIconePlay(true);
+
+        } catch (e) {
+            console.error("Erro ao tocar playlist:", e);
         }
     });
 
