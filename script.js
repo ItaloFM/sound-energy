@@ -291,14 +291,7 @@ async function tocarFaixa(track, idx) {
                     ? JSON.stringify({ uris: uris.slice(0, 50) })
                     : JSON.stringify({ uris: [track.uri] });
 
-                // Transfere device antes de tocar
-                await fetch("https://api.spotify.com/v1/me/player", {
-                    method: "PUT",
-                    headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
-                    body: JSON.stringify({ device_ids: [deviceId], play: false })
-                });
-                await delay(800);
-
+                // Inicia direto sem transferir
                 const resp = await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
                     method: "PUT",
                     headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
@@ -674,18 +667,7 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
             // Ativa o device antes de qualquer comando
             if (spotifyPlayer?.activateElement) await spotifyPlayer.activateElement();
 
-            // Transfere reprodução para o device
-            const transferResp = await fetch("https://api.spotify.com/v1/me/player", {
-                method: "PUT",
-                headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
-                body: JSON.stringify({ device_ids: [deviceId], play: false })
-            });
-            console.log("Transfer status:", transferResp.status);
-
-            // Aguarda o device ficar ativo
-            await delay(1000);
-
-            // Inicia a playlist
+            // Inicia direto sem transferir — device_id na URL já direciona corretamente
             const resp = await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
                 method: "PUT",
                 headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
