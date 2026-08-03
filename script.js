@@ -171,10 +171,16 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
         if (!state) return;
         const track = state.track_window.current_track;
         if (track) {
-            $("#player-track-name").text(track.name);
-            $("#player-track-artist").text(track.artists.map(a => a.name).join(", "));
-            const img = track.album.images?.[2]?.url || track.album.images?.[0]?.url || "";
+            const nome     = track.name;
+            const artistas = track.artists.map(a => a.name).join(", ");
+            const img      = track.album.images?.[2]?.url || track.album.images?.[0]?.url || "";
+
+            $("#player-track-name").text(nome);
+            $("#player-track-artist").text(artistas);
             if (img) $("#player-thumb").attr("src", img);
+
+            // Atualiza título da aba
+            document.title = `${nome} • ${artistas} — Sound Energy`;
         }
         setIconePlay(!state.paused);
         atualizarProgressoSDK(state);
@@ -277,7 +283,7 @@ async function tocarFaixa(track, idx) {
         }
     }
 
-    // Fallback: preview de 30s se disponível
+    // Fallback audio — também atualiza título
     if (track.preview_url) {
         audio.pause();
         clearInterval(progressTimer);
@@ -285,10 +291,13 @@ async function tocarFaixa(track, idx) {
         audio.volume = 0.7;
         audio.play();
         setIconePlay(true);
+        const artistas = track.artists?.map(a => a.name).join(", ") || "";
+        document.title = `${track.name} • ${artistas} — Sound Energy`;
         progressTimer = setInterval(atualizarProgressoAudio, 250);
         audio.onended = () => {
             setIconePlay(false);
             clearInterval(progressTimer);
+            document.title = "Sound Energy";
             if (idx + 1 < filaFaixas.length) tocarFaixa(filaFaixas[idx + 1], idx + 1);
         };
         return;
@@ -400,9 +409,11 @@ function carregarUsuarioNavbar() {
     $(".navbar-user").on("click", function () {
         const temOAuth = !!getOAuthToken();
         const opcoes   = temOAuth
-            ? `<button id="swal-spotify" class="swal-btn swal-btn-green">🔄 Reconectar Spotify</button>
+            ? `<button id="swal-perfil" class="swal-btn swal-btn-gray">👤 Ver Perfil</button>
+               <button id="swal-spotify" class="swal-btn swal-btn-green">🔄 Reconectar Spotify</button>
                <button id="swal-logout" class="swal-btn swal-btn-red">Sair</button>`
-            : `<button id="swal-spotify" class="swal-btn swal-btn-green">🎵 Conectar Spotify Premium</button>
+            : `<button id="swal-perfil" class="swal-btn swal-btn-gray">👤 Ver Perfil</button>
+               <button id="swal-spotify" class="swal-btn swal-btn-green">🎵 Conectar Spotify Premium</button>
                <button id="swal-logout" class="swal-btn swal-btn-red">Sair</button>`;
 
         Swal.fire({
@@ -412,6 +423,10 @@ function carregarUsuarioNavbar() {
             background: "#1a1a1a",
             color: "#fff",
             didOpen: () => {
+                document.getElementById("swal-perfil")?.addEventListener("click", () => {
+                    Swal.close();
+                    window.location.href = "profile.html";
+                });
                 document.getElementById("swal-logout")?.addEventListener("click", () => {
                     localStorage.clear();
                     Swal.close();
@@ -592,11 +607,20 @@ function renderizarSidebar(playlists) {
 }
 
 function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
-    $("#playlist-hero-cover").attr("src", imgUrl).attr("alt", nome);
+    // Animação de loading no hero
+    $("#playlist-hero-cover").addClass("hero-loading");
+    $(".song-list").remove();
+    $(".hero-meta-stats").text("Carregando faixas...");
+
+    // Pequeno delay para a animação aparecer antes de atualizar
+    setTimeout(() => {
+        $("#playlist-hero-cover").attr("src", imgUrl).attr("alt", nome);
+        $("#playlist-hero-cover").removeClass("hero-loading");
+    }, 200);
+
     $(".action-icon img").attr("src", imgUrl);
     $("#playlist-hero-title").text(nome);
     $(".hero-meta-author").text(dono);
-    $(".hero-meta-stats").text("Carregando faixas...");
 
     // Botão play do hero toca a playlist inteira
     $(".action-play").off("click").on("click", async () => {
@@ -700,7 +724,7 @@ function injetarEstilos() {
                     font-size:14px; cursor:pointer; font-family:"New Rocker",sans-serif; }
         .swal-btn-green { background: linear-gradient(135deg,#1ed760,#17b34e); color:#000; }
         .swal-btn-red   { background: linear-gradient(135deg,#cc0000,#8b0000); color:#fff; }
-        .swal-btn:hover { filter: brightness(1.1); }
+        .swal-btn:hover { filter: brightness(1.15); }
     `;
     document.head.appendChild(style);
 }
