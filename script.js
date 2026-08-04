@@ -889,9 +889,23 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
             });
             console.log("Play status:", resp.status);
 
-            if (resp.status === 404 && spotifyPlayer) {
-                console.warn("Device inativo, tentando via SDK...");
-                await spotifyPlayer.resume().catch(() => { });
+            if (resp.status === 404) {
+                // Device inativo — transfere e tenta novamente
+                console.warn("Device inativo, transferindo...");
+                await fetch("https://api.spotify.com/v1/me/player", {
+                    method: "PUT",
+                    headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
+                    body: JSON.stringify({ device_ids: [deviceId], play: true })
+                });
+                await delay(1500);
+                // Tenta tocar novamente
+                const resp2 = await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
+                    method: "PUT",
+                    headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
+                    body: JSON.stringify({ context_uri: "spotify:playlist:" + playlistId })
+                });
+                console.log("Play retry status:", resp2.status);
+                if (resp2.ok || resp2.status === 204) setIconePlay(true);
             } else if (resp.ok || resp.status === 204) {
                 setIconePlay(true);
             }
