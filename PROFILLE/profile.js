@@ -179,6 +179,37 @@ async function carregarArtistas() {
 }
 
 // ─────────────────────────────────────────
+//  HISTÓRICO DE REPRODUÇÃO
+// ─────────────────────────────────────────
+function carregarHistorico() {
+    const historico = JSON.parse(localStorage.getItem("se_historico") || "[]");
+    if (historico.length === 0) return;
+
+    $("#historico-section").show();
+    const lista = $("#historico-list");
+
+    historico.forEach((item, i) => {
+        const data = new Date(item.timestamp);
+        const hora = data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+        const dia  = data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+        const delay = Math.min(i * 0.04, 0.6);
+
+        const row = $(`
+            <div class="historico-row" style="animation-delay:${delay}s">
+                ${item.img ? `<img src="${item.img}" alt="${item.nome}" class="historico-thumb">` : `<div class="historico-thumb"></div>`}
+                <div class="historico-info">
+                    <span class="historico-nome">${item.nome}</span>
+                    <span class="historico-artista">${item.artistas}</span>
+                </div>
+                <span class="historico-hora">${dia} ${hora}</span>
+            </div>
+        `);
+
+        lista.append(row);
+    });
+}
+
+// ─────────────────────────────────────────
 //  INICIALIZAÇÃO
 // ─────────────────────────────────────────
 $(document).ready(async function () {
@@ -191,4 +222,5 @@ $(document).ready(async function () {
     await carregarPerfil();
     await carregarPlaylists();
     await carregarArtistas();
+    carregarHistorico();
 });

@@ -354,3 +354,71 @@ body {
     .profile-playlists { grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .profile-artists   { grid-template-columns: repeat(2, 1fr); gap: 12px; }
 }
+
+/* ───────────────────────────────
+   HISTÓRICO DE REPRODUÇÃO
+─────────────────────────────── */
+.historico-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.historico-row {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: default;
+    transition: background-color 0.15s;
+    opacity: 0;
+    animation: fadeUp 0.3s ease forwards;
+}
+
+.historico-row:hover { background-color: rgba(255,255,255,0.07); }
+
+.historico-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background-color: #282828;
+}
+
+.historico-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow: hidden;
+}
+
+.historico-nome {
+    color: #fff;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.historico-artista {
+    color: #b3b3b3;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.historico-hora {
+    color: #535353;
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+    .historico-row { grid-template-columns: 40px 1fr auto; gap: 8px; }
+    .historico-hora { display: none; }
+}

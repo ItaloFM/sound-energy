@@ -194,6 +194,11 @@ window.onSpotifyWebPlaybackSDKReady = async () => {
 
             // Toast de notificação
             mostrarToast(nome, artistas, img);
+
+            // Salva no histórico de reprodução
+            if (!state.paused) {
+                salvarHistorico({ nome, artistas, img, uri: track.uri, timestamp: Date.now() });
+            }
         }
         setIconePlay(!state.paused);
         atualizarProgressoSDK(state);
@@ -977,6 +982,19 @@ function injetarEstilos() {
         .swal-btn:hover { filter: brightness(1.15); }
     `;
     document.head.appendChild(style);
+}
+
+// ─────────────────────────────────────────
+//  HISTÓRICO DE REPRODUÇÃO
+// ─────────────────────────────────────────
+function salvarHistorico(entrada) {
+    const historico = JSON.parse(localStorage.getItem("se_historico") || "[]");
+
+    // Evita duplicata consecutiva da mesma música
+    if (historico.length > 0 && historico[0].uri === entrada.uri) return;
+
+    historico.unshift(entrada);
+    localStorage.setItem("se_historico", JSON.stringify(historico.slice(0, 30)));
 }
 
 // ─────────────────────────────────────────
