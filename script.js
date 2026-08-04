@@ -263,6 +263,50 @@ let filaUris = [];
 let filaFaixas = [];
 let tocandoIdx = -1;
 
+// Detecta se está em browser mobile (SDK não suportada)
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+// Busca o device ID do app Spotify no celular do usuário
+async function getSpotifyAppDeviceId(oauthToken) {
+    const r = await fetch("https://api.spotify.com/v1/me/player/devices", {
+        headers: { "Authorization": "Bearer " + oauthToken }
+    });
+    if (!r.ok) return null;
+    const data = await r.json();
+    // Prioriza o device ativo, depois qualquer um disponível
+    const devices = data?.devices || [];
+    const ativo   = devices.find(d => d.is_active);
+    return ativo?.id || devices[0]?.id || null;
+}
+
+async function tocarPlaylistMobile(playlistId, oauthToken) {
+    const mobileDeviceId = await getSpotifyAppDeviceId(oauthToken);
+
+    if (!mobileDeviceId) {
+        Swal.fire({
+            icon: "info",
+            title: "Abra o Spotify",
+            html: `<p style="color:#b3b3b3;font-size:14px">
+                       Abra o app do Spotify no seu celular e tente novamente.
+                       <br><br>
+                       O Spotify precisa estar ativo em segundo plano.
+                   </p>`,
+            confirmButtonColor: "#cc0000",
+            background: "#1a1a1a",
+            color: "#fff"
+        });
+        return false;
+    }
+
+    const resp = await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + mobileDeviceId, {
+        method: "PUT",
+        headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
+        body: JSON.stringify({ context_uri: "spotify:playlist:" + playlistId })
+    });
+    console.log("Mobile play status:", resp.status);
+    return resp.ok || resp.status === 204;
+}
+
 async function tocarFaixa(track, idx) {
     // Atualiza UI imediatamente
     const artistas = track.artists?.map(a => a.name).join(", ") || "";
@@ -274,7 +318,25 @@ async function tocarFaixa(track, idx) {
     $(".song-row").eq(idx).addClass("playing");
     tocandoIdx = idx;
 
-    // Se SDK está pronta e tem OAuth, usa reprodução completa
+    // Mobile — transfere para o app do Spotify
+    if (isMobile) {
+        const oauthToken = await getOAuthTokenValido();
+        if (oauthToken && track.uri) {
+            const mobileDeviceId = await getSpotifyAppDeviceId(oauthToken);
+            if (mobileDeviceId) {
+                const uris = filaFaixas.slice(idx).map(t => t.uri).filter(Boolean);
+                await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + mobileDeviceId, {
+                    method: "PUT",
+                    headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
+                    body: JSON.stringify({ uris: uris.slice(0, 50) })
+                });
+                setIconePlay(true);
+            }
+        }
+        return;
+    }
+
+    // Desktop — usa a SDK
     if (sdkPronto && deviceId) {
         const oauthToken = await getOAuthTokenValido();
         if (oauthToken && track.uri) {
@@ -722,6 +784,15 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
         const oauthToken = await getOAuthTokenValido();
         if (!oauthToken) { loginSpotify(); return; }
 
+        // Mobile — usa o app do Spotify em vez da SDK
+        if (isMobile) {
+            setIconePlay(true);
+            const ok = await tocarPlaylistMobile(playlistId, oauthToken);
+            if (!ok) setIconePlay(false);
+            return;
+        }
+
+        // Desktop — usa a SDK
         if (!sdkPronto || !deviceId) {
             Swal.fire({
                 icon: "info",
@@ -737,7 +808,6 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
         }
 
         try {
-            // Ativa o device via SDK (mais confiável que API REST)
             if (spotifyPlayer?.activateElement) await spotifyPlayer.activateElement();
 
             const resp = await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
@@ -747,7 +817,6 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
             });
             console.log("Play status:", resp.status);
 
-            // Se 404, tenta forçar via SDK diretamente
             if (resp.status === 404 && spotifyPlayer) {
                 console.warn("Device inativo, tentando via SDK...");
                 await spotifyPlayer.resume().catch(() => { });
