@@ -882,6 +882,23 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
         try {
             if (spotifyPlayer?.activateElement) await spotifyPlayer.activateElement();
 
+            // Verifica se o token OAuth tem os escopos corretos
+            const meResp = await fetch("https://api.spotify.com/v1/me", {
+                headers: { "Authorization": "Bearer " + oauthToken }
+            });
+
+            if (!meResp.ok) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Reconecte o Spotify",
+                    text: "Sua sessão expirou. Clique no avatar e reconecte o Spotify Premium.",
+                    background: "#1a1a1a",
+                    color: "#fff",
+                    confirmButtonColor: "#cc0000"
+                });
+                return;
+            }
+
             const resp = await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
                 method: "PUT",
                 headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
@@ -890,7 +907,6 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
             console.log("Play status:", resp.status);
 
             if (resp.status === 404) {
-                // Device inativo — transfere e tenta novamente
                 console.warn("Device inativo, transferindo...");
                 await fetch("https://api.spotify.com/v1/me/player", {
                     method: "PUT",
@@ -898,7 +914,6 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
                     body: JSON.stringify({ device_ids: [deviceId], play: true })
                 });
                 await delay(1500);
-                // Tenta tocar novamente
                 const resp2 = await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + deviceId, {
                     method: "PUT",
                     headers: { "Authorization": "Bearer " + oauthToken, "Content-Type": "application/json" },
@@ -906,6 +921,20 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
                 });
                 console.log("Play retry status:", resp2.status);
                 if (resp2.ok || resp2.status === 204) setIconePlay(true);
+                else {
+                    Swal.fire({
+                        icon: "info",
+                        title: "Abra o Spotify",
+                        html: `<p style="color:#b3b3b3;font-size:14px">
+                            Abra o app do Spotify no computador, toque qualquer música e tente novamente.
+                            <br><br>
+                            O Spotify precisa estar ativo antes de receber comandos remotos.
+                        </p>`,
+                        confirmButtonColor: "#cc0000",
+                        background: "#1a1a1a",
+                        color: "#fff"
+                    });
+                }
             } else if (resp.ok || resp.status === 204) {
                 setIconePlay(true);
             }
