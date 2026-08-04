@@ -1119,6 +1119,17 @@ $(document).ready(async function () {
 
     console.log("Inicializando Sound Energy...");
 
+    // Limpa tokens antigos sem escopos de playback
+    const oauthCheck = localStorage.getItem("se_oauth_token");
+    const scopeCheck = localStorage.getItem("se_oauth_scopes");
+    if (oauthCheck && scopeCheck !== "v2") {
+        console.warn("Token antigo detectado — forçando reconexão com escopos corretos");
+        localStorage.removeItem("se_oauth_token");
+        localStorage.removeItem("se_oauth_refresh");
+        localStorage.removeItem("se_oauth_expires_at");
+        localStorage.setItem("se_oauth_scopes", "v2");
+    }
+
     // Listeners de conexão
     window.addEventListener("online", () => {
         console.log("✅ Conexão restaurada");
