@@ -614,6 +614,18 @@ const PLAYLIST_IDS = [
 ];
 
 async function buscarPlaylistsDestaque() {
+    // Offline — usa cache do localStorage
+    if (!navigator.onLine) {
+        const cache = localStorage.getItem("se_playlists_cache");
+        if (cache) {
+            console.log("📦 Offline — carregando playlists do cache");
+            mostrarBannerOffline();
+            return JSON.parse(cache);
+        }
+        console.warn("Offline e sem cache disponível.");
+        return [];
+    }
+
     const oauthToken = await getOAuthTokenValido();
     const token = oauthToken || await getToken();
 
@@ -628,6 +640,12 @@ async function buscarPlaylistsDestaque() {
         } else {
             console.warn("Erro ao buscar playlist " + id + ":", r.status);
         }
+    }
+
+    // Salva no cache para uso offline
+    if (playlists.length > 0) {
+        localStorage.setItem("se_playlists_cache", JSON.stringify(playlists));
+        console.log("✅ Playlists salvas no cache offline");
     }
 
     console.log("Playlists carregadas:", playlists.map(p => p.name));
@@ -659,6 +677,15 @@ async function fetchComRetry(url, token, tentativas = 3) {
 }
 
 async function buscarFaixas(playlistId, playlistNome, indice = 0) {
+    // Offline — usa cache de faixas
+    if (!navigator.onLine) {
+        const cacheFaixas = JSON.parse(localStorage.getItem("se_faixas_cache") || "{}");
+        if (cacheFaixas[playlistId]) {
+            console.log("📦 Faixas do cache offline:", playlistId);
+            return cacheFaixas[playlistId];
+        }
+        return [];
+    }
     const oauthToken = await getOAuthTokenValido();
 
     // Tenta buscar faixas da playlist com OAuth
@@ -722,6 +749,46 @@ function corDominante(imgEl, callback) {
     } catch {
         callback("linear-gradient(160deg, #cc0000 0%, #8b0000 50%, #121212 100%)");
     }
+}
+
+// ─────────────────────────────────────────
+//  MODO OFFLINE
+// ─────────────────────────────────────────
+function mostrarBannerOffline() {
+    // Evita mostrar múltiplas vezes
+    if ($("#offline-banner").length) return;
+
+    $("body").prepend(`
+        <div id="offline-banner" style="
+            position: fixed;
+            top: 56px;
+            left: 0;
+            width: 100%;
+            background: #8b0000;
+            color: #fff;
+            text-align: center;
+            padding: 8px 16px;
+            font-size: 13px;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        ">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>
+            </svg>
+            Você está offline — exibindo dados salvos
+        </div>
+    `);
+
+    // Ajusta o margin-top do app-wrapper para compensar o banner
+    $(".app-wrapper").css("margin-top", "88px");
+}
+
+function esconderBannerOffline() {
+    $("#offline-banner").remove();
+    $(".app-wrapper").css("margin-top", "56px");
 }
 
 // ─────────────────────────────────────────
@@ -838,11 +905,18 @@ function atualizarHero(playlistId, imgUrl, nome, dono, indice = 0) {
 
     buscarFaixas(playlistId, nome, indice).then(faixas => {
         filaFaixas = faixas;
-        const total = faixas.length;
+        const total    = faixas.length;
         const durTotal = faixas.reduce((a, t) => a + (t?.duration_ms || 0), 0);
-        const min = Math.floor(durTotal / 60000);
+        const min      = Math.floor(durTotal / 60000);
         $(".hero-meta-stats").text(`${total} músicas • ${Math.floor(min / 60)}h ${min % 60}min`);
         renderizarFaixas(faixas);
+
+        // Salva faixas no cache offline
+        if (navigator.onLine && faixas.length > 0) {
+            const cacheFaixas = JSON.parse(localStorage.getItem("se_faixas_cache") || "{}");
+            cacheFaixas[playlistId] = faixas;
+            localStorage.setItem("se_faixas_cache", JSON.stringify(cacheFaixas));
+        }
     });
 }
 
@@ -983,6 +1057,20 @@ $(document).ready(async function () {
     });
 
     console.log("Inicializando Sound Energy...");
+
+    // Listeners de conexão
+    window.addEventListener("online", () => {
+        console.log("✅ Conexão restaurada");
+        esconderBannerOffline();
+    });
+
+    window.addEventListener("offline", () => {
+        console.log("📴 Conexão perdida");
+        mostrarBannerOffline();
+    });
+
+    // Mostra banner se já estiver offline ao entrar
+    if (!navigator.onLine) mostrarBannerOffline();
 
     if (!localStorage.getItem("se_usuario") && !localStorage.getItem("se_spotify_user")) {
         window.location.href = "login/login.html";
